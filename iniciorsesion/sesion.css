@@ -1,332 +1,542 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
+/* Pantalla de inicio de sesión / registro de Capi-Barato.
+   Dos paneles: a la izquierda la imagen de marca (img/capi-barato-login-lateral_final_1.png,
+   que ya trae el logo, el eslogan y los beneficios) y a la derecha el formulario. */
 
 :root{
-    /* colors */
-    --body-color:#0f0a06;
-    --white-color:#fff;
-    --container-color:#1a1a1a96;
-    --light-bacco:#00FFDD;
-    --yellow-light:#FFED00;
-
-
-    /* font sizes */
-    --h2-font-size: 2em;
-    --small-font-size:1em;
-    --medium-font-size:1.2em;
-    --smaller-font-size:0.9em;
+    --amarillo:#fed617;
+    --amarillo-hover:#f2c800;
+    --amarillo-texto:#8f6c00;
+    --negro:#111318;
+    --clr-texto:#2b2f36;
+    --clr-texto-suave:#6b7280;
+    --clr-borde:#e8e9ee;
+    --clr-borde-suave:#edeef2;
+    --clr-panel:#fafafb;
+    --clr-error:#d32f2f;
+    /* Cuanto se inclina hacia la izquierda el borde derecho del panel visual.
+       En la referencia el corte baja ~95 px en 845 px de alto (~13,5 % del
+       ancho del panel), asi que se expresa en % para que el angulo aguante
+       cualquier resolucion. */
+    --diagonal:13.5%;
 }
 *{
     margin: 0;
-    font-family: "poppins";
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Figtree', 'Segoe UI', sans-serif;
 }
-
 body{
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
-    background: var(--body-color);
+    background: var(--clr-panel);
+    color: var(--clr-texto);
+    overflow-x: hidden;         /* ningun corrimiento lateral en ningun ancho */
+}
+a{
+    color: inherit;
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible{
+    outline: 3px solid var(--negro);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/*--- Estructura de dos paneles ---*/
+.sesion-layout{
+    display: grid;
+    grid-template-columns: 51% 1fr;     /* mismas proporciones que la referencia */
+    min-height: 100vh;
+}
+
+/* El panel visual ocupa su columna completa y es el CONTENEDOR el que se
+   recorta en diagonal (nunca la imagen, que asi no se deforma ni se inclina).
+   El triangulo que queda fuera del clip deja ver el fondo del <body>, que es
+   exactamente el mismo gris del panel derecho: por eso no hay huecos, franjas
+   ni bordes negros en la union. */
+.sesion-visual{
+    position: relative;
     overflow: hidden;
+    background: #16171a;
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--diagonal)) 100%, 0 100%);
 }
 
-.login-container{
-    position: relative;
-    width: 400px;
-    height: 450px;
-    background-color: var(--container-color);
-    border-radius: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-h2{
-    font-size: var(--h2-font-size);
-    color: var(--white-color);
-    text-align: center;
-    transition: 0.5s ease;
-}
-
-.input-check:checked~h2{
-    color: var(--light-bacco);
-    text-shadow: 0 0 15px var(--light-bacco),
-                 0 0 30px var(--light-bacco);             
-}
-
-.input-box{
-    position: relative;
-    width: 310px;
-    margin: 30px 0;
-}
-
-.input-box .input-line{
-   position: absolute;
-   width: 100%;
-   bottom: -2px;
-   left: 0;
-   height: 2.5px;
-   background: var(--white-color);
-   transition: 0.5s ease;
-}
-
-.input-check:checked~.input-box .input-line{
-    background: var(--light-bacco);
-    box-shadow: 0 0 10px var(--light-bacco);                        
-}
-
-
-.input-box label{
+/* El PNG (1326x1186) trae su propia cuna BLANCA OPACA en el borde derecho:
+   arranca en x=1325 a la altura de y=165 y baja hasta x=1174 abajo, o sea que
+   llega a ocupar el 11,46 % del ancho. Si quedara a la vista se veria una
+   franja blanca y una segunda diagonal desfasada, asi que se ensancha la
+   imagen un 14,29 % (= 1 / 0,875) y se ancla a la izquierda: solo se muestra
+   el 87,5 % izquierdo, la cuna cae siempre fuera del contenedor y la unica
+   diagonal visible es la del clip-path. */
+.sesion-visual img{
     position: absolute;
-    top: 50%;
-    left: 5px;
-    transform: translateY(-50%);
-    font-size: var(--small-font-size);
+    top: 0;
+    left: 0;
+    width: 114.29%;
+    height: 100%;
+    object-fit: cover;          /* cubre el panel sin deformarse */
+    object-position: 42% center;/* encuadre: deja el logo y los titulares a la vista */
+}
+
+.sesion-panel{
+    position: relative;
+    overflow: hidden;           /* recorta los círculos decorativos */
+    background: var(--clr-panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 76px 40px 56px;
+}
+
+/* Círculos amarillos de la esquina inferior derecha. */
+.panel-deco,
+.panel-deco-suave{
+    position: absolute;
+    border-radius: 50%;
     pointer-events: none;
-    color: var(--white-color);
-    transition: .5s ease;
+}
+.panel-deco{
+    right: -153px;
+    bottom: -153px;
+    width: 306px;
+    height: 306px;
+    background: var(--amarillo);
+}
+.panel-deco-suave{
+    /* Arco pálido que en la referencia solo asoma por el borde derecho. */
+    right: -800px;
+    bottom: -458px;
+    width: 900px;
+    height: 900px;
+    background: #fdf0bb;
 }
 
-.input-box input:focus~label,
-.input-box input:valid~label{
-    top: -5px;
+/*--- Enlaces de la cabecera del panel ---*/
+.volver-inicio{
+    position: absolute;
+    top: 30px;
+    left: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 2px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--clr-texto-suave);
+    text-decoration: none;
+}
+.volver-inicio:hover{
+    color: var(--negro);
 }
 
-.input-check:checked~.input-box label{
-    color: var(--light-bacco);
-    text-shadow: 0 0 10px var(--light-bacco);                        
+.panel-top{
+    position: absolute;
+    top: 36px;
+    right: 48px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--clr-texto-suave);
+}
+.panel-top button{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--amarillo-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.panel-top button:hover{
+    color: var(--negro);
+}
+.panel-top button[hidden]{      /* [hidden] tiene que ganarle al inline-flex */
+    display: none;
 }
 
-.input-box input{
+/*--- Marca ---*/
+.panel-contenido{
     width: 100%;
-    height: 50px;
-    background: transparent;
+    max-width: 545px;
+}
+.marca{
+    text-align: center;
+    margin-bottom: 34px;
+}
+.marca-logo{
+    /* El PNG original tiene margen alrededor del círculo: se fija el alto para
+       que el círculo amarillo mida los ~110 px de la referencia. */
+    height: 116px;
+    width: auto;
+    display: block;
+    margin: 0 auto 8px;
+}
+.marca-nombre{
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -.5px;
+    line-height: 1.1;
+    color: var(--negro);
+}
+.marca-nombre span{
+    color: var(--amarillo);
+}
+.marca-sub{
+    margin-top: 7px;
+    font-size: 15px;
+    color: var(--clr-texto-suave);
+}
+
+/*--- Tarjeta del formulario ---*/
+.sesion-card{
+    background: #fff;
+    border: 1px solid var(--clr-borde-suave);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(17,19,24,.06);
+    padding: 34px;
+}
+
+.formulario{
+    display: none;
+}
+.formulario.activo{
+    display: block;
+}
+
+.campo{
+    margin-bottom: 20px;
+}
+.campo label{
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #4b5563;
+}
+.campo-control{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--clr-borde);
+    border-radius: 10px;
+    background: #fff;
+    transition: border-color .2s, box-shadow .2s;
+}
+.campo-control:focus-within{
+    border-color: var(--amarillo);
+    box-shadow: 0 0 0 3px rgba(254,214,23,.28);
+}
+.campo-control .icon{
+    font-size: 17px;
+    color: #9ca3af;
+    line-height: 1;
+}
+.campo-control:focus-within .icon{
+    color: var(--negro);
+}
+.campo-control input{
+    flex: 1;
+    min-width: 0;
+    height: 100%;
     border: none;
     outline: none;
-    font-size: var(--small-font-size);
-    color: var(--white-color);
-    padding: 0 35px 0 5px;
-    transition: 0.5s ease;
+    background: transparent;
+    font-size: 14.5px;
+    color: var(--clr-texto);
+}
+.campo-control input::placeholder{
+    color: #a3a7af;
+}
+.ver-password{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: #9ca3af;
+    font-size: 16px;
+    cursor: pointer;
+}
+.ver-password:hover{
+    color: var(--negro);
 }
 
-.input-check:checked~.input-box input{
-    color: var(--light-bacco);
-    text-shadow: 0 0 5px var(--light-bacco);                        
+.mensaje-error{
+    display: block;
+    min-height: 18px;
+    margin: -6px 0 2px;
+    font-size: 13px;
+    color: var(--clr-error);
 }
 
-.input-box .icon{
-    position: absolute;
-    right: 8px;
-    color: var(--white-color) ;
-    font-size:var(--medium-font-size);
-    line-height: 57px;
-    transition: 0.5s;
-}
-
-.input-check:checked~.input-box .icon{
-    color: var(--light-bacco);
-    filter: drop-shadow(0 0 5px --light-bacco);                       
-}
 .remember-forgot{
     display: flex;
     justify-content: space-between;
-    color: var(--white-color);
-    font-size:var(--smaller-font-size);
-    margin: -15px 0 15px;
-    transition: 0.5s ease;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 6px 0 20px;
+    font-size: 13.5px;
+    color: var(--clr-texto-suave);
 }
-
-.input-check:checked~.remember-forgot{
-    color: var(--light-bacco);
-    text-shadow: 0 0 10px var(--light-bacco);                        
-}
-
-.remember-forgot label input{
-    accent-color: var(--white-color);
-    margin-right: 3px;
-    transition: 0.5s ease;
-}
-
-.input-check:checked~.remember-forgot label input{
-    accent-color: var(--light-bacco);                       
-}
-
-.remember-forgot a{
-    color: var(--white-color);
-    text-decoration: none;
-    transform: color .5s ease
-}
-
-.remember-forgot a:hover{
-    text-decoration: underline;
-}
-
-.input-check:checked~.remember-forgot a{
-    color: var(--light-bacco);
-}
-
-button{
-    width: 100%;
-    height: 40px;
-    background: var(--white-color);
-    border-radius: 10px;
-    border: none;
-    outline: none;
+.recordarme{
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 24px;
     cursor: pointer;
-    font-size: var(--small-font-size);
-    color: var(--body-color);
+}
+.recordarme input[type="checkbox"]{
+    width: 16px;
+    height: 16px;
+    accent-color: var(--amarillo);
+    cursor: pointer;
+}
+.remember-forgot a{
+    display: inline-block;
+    padding: 4px 0;
+    color: var(--amarillo-texto);
     font-weight: 500;
-    transition: 0.5s ease;
-}
-
-.input-check:checked~button{
-    background: var(--light-bacco);
-    box-shadow: 0 0 15px var(--light-bacco);                        
-}
-
-.register-link{
-    color: var(--white-color);
-    font-size: var(--smaller-font-size);
-    text-align: center;
-    margin: 25px 0 10px;
-    transition: 0.5s ease;
-}
-
-.input-check:checked~.register-link{
-    color: var(--light-bacco);
-    text-shadow: 0 0 10px var(--light-bacco);                        
-}
-
-.register-link p a{
-    color: var(--white-color);
-    text-decoration: none;
-    font-weight: 550;
-    transition: 0.5s ease;
-}
-
-.input-check:checked~.register-link p a{
-    color: var(--light-bacco);                       
-}
-
-.register-link p a:hover{
     text-decoration: underline;
-    
+    text-underline-offset: 3px;
+}
+.remember-forgot a:hover{
+    color: var(--negro);
 }
 
-.login-light{
-    position: absolute;
-    top: -123px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 500px;
-    height: 10px;
-    background: var(--light-bacco);
-    border-radius: 20px;
-}
-
-.login-light::before{
-    content: '';
-    position: absolute;
-    top: -900px;
-    left: 0;
+.btn-principal{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
     width: 100%;
-    height: 950px;
-    background: linear-gradient(to bottom, rgba(255,255,255, .3)-50%,
-                                           rgba(255, 255,255,0)90%);
-    clip-path: polygon(20% 0,80% 0, 100% 100%, 0 100%);
-    pointer-events: none;
-    transition: .5s ease;
-}
-
-.input-check:checked~.login-light::before{
-    top: 0;
-
-}
-
-.toggle{
-    position: absolute;
-    top: 20px;
-    width: 60px;
-    height: 120px;
-    background: var(--container-color);
-    right: -70px;
+    height: 48px;
+    border: none;
     border-radius: 10px;
+    background: var(--amarillo);
+    color: var(--negro);
+    font-size: 15.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color .2s, transform .1s;
+}
+.btn-principal i{
+    font-size: 16px;
+}
+.btn-principal:hover{
+    background: var(--amarillo-hover);
+}
+.btn-principal:active{
+    transform: translateY(1px);
+}
+.btn-principal:disabled{
+    opacity: .65;
+    cursor: default;
+    transform: none;
 }
 
-.toggle::before{
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px;
-    height: 80%;
-    background: var(--body-color);
+.link-cambiar-formulario{
+    margin-top: 22px;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--clr-texto-suave);
+}
+.link-cambiar-formulario button{
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--amarillo-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.link-cambiar-formulario button:hover{
+    color: var(--negro);
 }
 
-.toggle::after{
-    content: "";
-    position: absolute;
-    top: 5px;
-    left: 50%;
-    transform: translate(-50%);
-    width: 45px;
-    height: 45px;
-    background: #333;
-    border: 2px solid var(--container-color);
-    border-radius: 10px;
-    cursor: [pointer];
-    box-shadow: 0 0 10px rgba(0, 0, 0, .5);
-    transition: .5s ease;
+/*--- Escritorio angosto (1100 - 1300 px): se le da mas aire al formulario ---*/
+@media (min-width: 1100px) and (max-width: 1300px){
+    .sesion-layout{
+        grid-template-columns: 48% 1fr;
+    }
+    .sesion-visual img{
+        object-position: 30% center;    /* menos recorte por la izquierda */
+    }
+    .sesion-panel{
+        padding: 70px 30px 48px;
+    }
+    .volver-inicio{
+        left: 32px;
+    }
+    .panel-top{
+        right: 34px;
+    }
+    .panel-contenido{
+        max-width: 470px;
+    }
+    .sesion-card{
+        padding: 28px;
+    }
 }
 
-.input-check:checked~.toggle::after{
-    top: 65px;
+/*--- Tablet y celular: la imagen pasa arriba y el formulario debajo ---------
+   Se apila tambien cuando la ventana es muy alta y angosta (tablet vertical),
+   porque ahi la columna izquierda recortaria el logo y los titulares. */
+@media (max-width: 1099px), (max-aspect-ratio: 4/5){
+    .sesion-layout{
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;   /* el formulario se queda con el resto */
+    }
 
+    /* Sin diagonal: la separacion es horizontal y limpia.
+       La altura va atada al ancho porque asi el recorte inferior cae SIEMPRE
+       en una franja vacia del PNG y nunca parte un texto por la mitad. En el
+       archivo hay hueco limpio en y=532..555 (entre el titular y el subtitulo);
+       como aqui la imagen se escala por ancho,
+       alto = ancho / 0,875 x (543 / 1326) = ancho x 0,468. */
+    .sesion-visual{
+        clip-path: none;
+        align-self: start;
+        height: 46.8vw;
+        max-height: 46vh;
+        border-bottom: 3px solid var(--amarillo);
+    }
+    .sesion-visual img{
+        object-position: left top;      /* prioriza el logo y el titular */
+    }
+
+    .sesion-panel{
+        min-height: 0;
+        justify-content: flex-start;
+        padding: 26px 20px 44px;
+    }
+
+    /* Los enlaces de la cabecera dejan de estar posicionados y entran en el
+       flujo, alineados con la tarjeta: asi no hacen falta paddings enormes ni
+       se superponen con nada. */
+    .volver-inicio,
+    .panel-top{
+        position: static;
+        width: 100%;
+        max-width: 545px;
+    }
+    .volver-inicio{
+        padding: 0;
+        margin-bottom: 10px;
+    }
+    .panel-top{
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .panel-contenido{
+        max-width: 545px;
+    }
+    .marca{
+        margin-bottom: 24px;
+    }
+    .marca-logo{
+        height: 92px;
+    }
+    .marca-nombre{
+        font-size: 34px;
+    }
+    .sesion-card{
+        padding: 26px 24px;
+    }
+
+    .panel-deco{
+        right: -110px;
+        bottom: -110px;
+        width: 220px;
+        height: 220px;
+    }
+    .panel-deco-suave{
+        right: -520px;
+        bottom: -300px;
+        width: 580px;
+        height: 580px;
+    }
 }
 
-.input-check{
-    position: absolute;
-    right: -70px;
-    z-index: 1;
-    opacity: 0;
+/*--- Apilado en pantallas anchas y bajas (tablet u horizontal): no hay alto
+   suficiente para el titular completo, asi que el corte sube al otro hueco
+   limpio del PNG, el de y=249..313 (justo debajo de "TIENDA ONLINE"):
+   alto = ancho / 0,875 x (281 / 1326) = ancho x 0,242. ---*/
+@media (min-aspect-ratio: 949/1000) and (max-width: 1099px){
+    .sesion-visual{
+        height: 24.2vw;
+    }
 }
 
-.toggle .text{
-    position: absolute;
-    top: 17px;
-    left: 50%;
-    transform: translate(-50%);
-    color: var(--white-color);
-    font-size: var(--small-font-size);
-    z-index: 1;
-    text-transform: uppercase;
-    pointer-events: none;
-    transition: .5s ease;
+/*--- Celular (hasta 600 px) ---*/
+@media (max-width: 600px){
+    .sesion-panel{
+        padding: 22px 16px 40px;
+    }
+    .panel-top,
+    .panel-top button{
+        font-size: 13px;
+    }
+    .marca{
+        margin-bottom: 20px;
+    }
+    .marca-logo{
+        height: 78px;
+    }
+    .marca-nombre{
+        font-size: 28px;
+    }
+    .marca-sub{
+        font-size: 14px;
+    }
+    .sesion-card{
+        padding: 20px 16px;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(17,19,24,.05);
+    }
+    .campo{
+        margin-bottom: 16px;
+    }
+    /* Campos y boton con altura comoda para tocar con el dedo. */
+    .campo-control{
+        height: 48px;
+    }
+    .btn-principal{
+        height: 50px;
+    }
+    .remember-forgot{
+        font-size: 13px;
+    }
+    /* Los circulos decorativos se achican para no apretar la tarjeta. */
+    .panel-deco{
+        right: -80px;
+        bottom: -80px;
+        width: 160px;
+        height: 160px;
+    }
+    .panel-deco-suave{
+        right: -360px;
+        bottom: -210px;
+        width: 420px;
+        height: 420px;
+    }
 }
-
-.toggle .text.off{
-    opacity: 1;
-}
-
-.input-check:checked~.toggle .text.off{
-    top: 76px;
-    opacity: 0;
-}
-
-.toggle .text.on{
-    opacity: 0;
-}
-
-.input-check:checked~.toggle .text.on{
-    top: 76px;
-    opacity: 1;
-    color: var(--light-bacco);
-    text-shadow: 0 0 15px var(--light-bacco),
-                 0 0 30px var(--light-bacco),
-                 0 0 45px var(--light-bacco),
-                 0 0 60px var(--light-bacco);
-}
-

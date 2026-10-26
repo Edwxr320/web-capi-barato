@@ -1,0 +1,12 @@
+Entorno de la ejecución registrada en tests/resultados/run_all.log (2026-10-24 03:40 -05)
+PHP 8.3.6 (cli) (built: Oct 19 2026 15:16:58) (NTS)
+mbstring pdo_mysql 
+mysql  Ver 15.1 Distrib 10.11.14-MariaDB, for debian-linux-gnu (x86_64) using  EditLine wrapper
+curl 8.5.0 (x86_64-pc-linux-gnu) libcurl/8.5.0 OpenSSL/3.0.13 zlib/1.3 brotli/1.1.0 zstd/1.5.5 libidn2/2.3.7 libpsl/0.21.2 (+libidn2/2.3.7) libssh/0.10.6/openssl/zlib nghttp2/1.59.0 librtmp/2.3 OpenLDAP/2.6.10
+Python 3.13.17
+Chromium 153.0.8010.12
+
+Instalación: ZIP descomprimido en una carpeta limpia; sql/mercadoweb.sql importado; config.php copiado de config.example.php sin cambios (root sin clave por socket).
+Pruebas: bash tests/run_all.sh (todas las suites) con PHP_CLI_SERVER_WORKERS=8, base aislada mercadoweb_test.
+Este entorno no tenía salida a Internet: se usó CDN_LOCAL con copias locales de Bootstrap Icons 1.11.1 y Figtree (desde npm) para que las capturas y la consola reflejen el sitio real. No cambia el código de la aplicación.
+La base 'mercadoweb' quedó idéntica antes y después de las pruebas: ver tests/resultados/checksum-mercadoweb-*.txt

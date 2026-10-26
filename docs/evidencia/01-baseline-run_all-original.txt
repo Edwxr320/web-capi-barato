@@ -1,0 +1,272 @@
+
+################ test_auth ################
+== 1) REGISTRO ==
+  OK   - Registro válido (HTTP 201)
+  OK   - Email duplicado rechazado (HTTP 409)
+  OK   - Email con formato inválido (HTTP 400)
+  OK   - Contraseña corta (HTTP 400)
+== 2) LOGIN ==
+  OK   - Contraseña incorrecta (HTTP 401)
+  OK   - Email inexistente (HTTP 401)
+  OK   - Mensaje idéntico (no revela si el email existe) ({"error":"Correo o contraseña incorrectos."})
+  OK   - Inyección SQL en el email no autentica (HTTP 401)
+  OK   - Login de cliente (HTTP 200)
+  OK   - Rol detectado (cliente)
+  OK   - Login de admin (HTTP 200)
+  OK   - Rol detectado (admin)
+== 3) SESIÓN ==
+  OK   - Invitado (False)
+  OK   - Cliente logueado (True)
+== 4) PROTECCIÓN POR ROL ==
+  OK   - admin sin sesión (HTTP 401)
+  OK   - admin con sesión de cliente (HTTP 403)
+  OK   - admin con sesión de admin (501 = pasa la protección, endpoint aún pendiente) (HTTP 501)
+  OK   - carrito sin sesión (HTTP 401)
+  OK   - carrito con sesión de cliente (HTTP 200)
+  OK   - pedidos sin sesión (HTTP 401)
+  OK   - catálogo público (HTTP 200)
+== 5) LOGOUT ==
+  OK   - Logout (HTTP 200)
+  OK   - La sesión quedó destruida en el servidor (False)
+  OK   - carrito con la cookie vieja (HTTP 401)
+
+================================================================
+RESULTADO FINAL: 24 pruebas OK, 0 con FALLA
+================================================================
+
+################ test_bloque1 ################
+== CATEGORÍAS ==
+  OK   - Listar (HTTP 200)
+  OK   - Son 3 (3)
+== PRODUCTOS: LISTAR ==
+  OK   - Catálogo completo (12)
+  OK   - Filtro celulares (4)
+  OK   - Categoría inexistente (HTTP 404)
+  OK   - POST rechazado (HTTP 405)
+== PRODUCTOS: DETALLE ==
+  OK   - Producto 1: 3 imágenes (3)
+  OK   - Producto 1: precio final (429.14)
+  OK   - Inexistente (HTTP 404)
+  OK   - id no numérico (HTTP 400)
+  OK   - Falta id (HTTP 400)
+  OK   - Inyección SQL en id (HTTP 400)
+  OK   - La tabla productos sigue intacta (12)
+== PRODUCTOS: BUSCAR ==
+  OK   - samsung (4)
+  OK   - SAMSUNG (mayúsculas) (4)
+  OK   - Por categoría: notebooks (4)
+  OK   - Por característica (bluetooth)
+  OK   - Sin resultados (0)
+  OK   - Falta q (HTTP 400)
+  OK   - Inyección SQL en q no rompe la consulta (HTTP 200)
+  OK   - …y se trata como texto literal (0 resultados) (0)
+== PÚBLICOS (no exigen sesión) ==
+  OK   - categorias/listar.php es público (HTTP 200)
+  OK   - productos/listar.php es público (HTTP 200)
+  OK   - productos/detalle.php?id=1 es público (HTTP 200)
+  OK   - productos/buscar.php?q=moto es público (HTTP 200)
+
+================================================================
+RESULTADO FINAL: 25 pruebas OK, 0 con FALLA
+================================================================
+
+################ test_bloque2 ################
+== 1) CARRITO VACÍO ==
+  OK   - Carrito vacío (HTTP 200)
+  OK   - Resumen en cero (0)
+== 2) AGREGAR ==
+  OK   - Agregar producto válido (HTTP 201)
+  OK   - Producto repetido: suma (1+2) (3)
+  OK   - …y no duplica la fila (1)
+  OK   - Producto inexistente (HTTP 404)
+  OK   - Más que el stock (producto 5, stock 2) (HTTP 409)
+  OK   - Sin sesión (HTTP 401)
+== 3) ACTUALIZAR ==
+  OK   - Cantidad válida (HTTP 200)
+  OK   - Cantidad 0 (HTTP 400)
+  OK   - Cantidad negativa (HTTP 400)
+  OK   - Cantidad decimal (HTTP 400)
+  OK   - Superior al stock (HTTP 409)
+  OK   - Producto inexistente (HTTP 404)
+  OK   - Los rechazos no modificaron nada (sigue en 5) (5)
+== 4) SEGURIDAD: carrito ajeno ==
+  OK   - A no puede actualizar el producto 4 de B (HTTP 404)
+  OK   - A no puede eliminar el producto 4 de B (HTTP 404)
+  OK   - El carrito de B quedó intacto ({4: 1})
+  OK   - Inyección SQL en id_producto (HTTP 400)
+== 5) ELIMINAR ==
+  OK   - Eliminar propio (HTTP 200)
+  OK   - Eliminar de nuevo (HTTP 404)
+== 6) PERSISTENCIA (logout + login) ==
+  OK   - Tras logout no accesible (HTTP 401)
+  OK   - El carrito persistió en MySQL ({2: 3})
+== 7) FUSIÓN ==
+  OK   - Fusionar (HTTP 200)
+  OK   - 2 suma (3+2), 6 nuevo, 5 limitado al stock, 'abc' ignorado ({2: 5, 5: 2, 6: 1})
+== 8) CÁLCULO: subtotal, descuento (precio final), envío, total ==
+  OK   - Subtotal (2 × 521.10) (1042.2)
+  OK   - Envío (S/50, no se multiplica por 2) (50)
+  OK   - Total (1092.2)
+  OK   - Envío con 50 y 100 en el carrito = el MAYOR (100), no la suma (100)
+  OK   - …y no cambia al subir la cantidad (100)
+  OK   - Todos con envío gratis = S/0.00 (0)
+
+================================================================
+RESULTADO FINAL: 31 pruebas OK, 0 con FALLA
+================================================================
+
+################ test_bloque3 ################
+== 1) CHECKOUT: carrito vacío / sin sesión / dirección ==
+  OK   - Carrito vacío (HTTP 400)
+  OK   - Sin sesión (HTTP 401)
+  OK   - Dirección vacía (HTTP 400)
+  OK   - Dirección demasiado corta (HTTP 400)
+  OK   - Ninguno de esos rechazos creó un pedido (0)
+== 2) CHECKOUT EXITOSO + CONSISTENCIA EN MYSQL ==
+  OK   - Checkout (HTTP 201)
+  OK   - Pedido existe (1)
+  OK   - Detalle existe (1 línea) (1)
+  OK   - Stock descontado (99)
+  OK   - Carrito vaciado (0)
+  OK   - Total correcto (envío gratis) (429.14)
+  OK   - Estado inicial (pendiente)
+  OK   - Pedido de A pertenece a A (2)
+== 3) PRECIO HISTÓRICO ==
+  OK   - El pedido conserva el precio de la compra (429.14)
+== 4) STOCK INSUFICIENTE ==
+  OK   - Stock insuficiente (HTTP 409)
+  OK   - El mensaje dice qué producto tiene el problema
+  OK   - No se creó pedido (0)
+  OK   - Stock intacto (2)
+== 5) ROLLBACK: un producto OK + otro sin stock ==
+  OK   - El checkout completo falla (HTTP 409)
+  OK   - Stock del producto válido intacto (no se descontó a medias) (21)
+  OK   - Stock del producto sin stock intacto (2)
+  OK   - El carrito de B no se vació (2)
+== 6) PRODUCTO DESACTIVADO CON EL CARRITO ARMADO ==
+  OK   - Producto desactivado rechazado (HTTP 409)
+  OK   - Stock intacto (21)
+== 7) ENVÍO EN UN CHECKOUT REAL (productos con S/50 y S/100) ==
+  OK   - Checkout con envíos mixtos (HTTP 201)
+  OK   - Envío = el mayor (100), no la suma (150) (100)
+  OK   - Subtotal (463.97 + 583.27) (1047.24)
+  OK   - Total (1147.24)
+  OK   - Todo gratis = envío S/0.00 (0)
+  OK   - …con 5 unidades: total = 5 × 429.14 (2145.7)
+== 8) HISTORIAL ==
+  OK   - A ve exactamente 1 pedido (1)
+  OK   - Detalle: dirección (Av. Javier Prado 456, San Isidro, Lima)
+  OK   - Detalle: 1 ítem (1)
+== 9) SEGURIDAD ==
+  OK   - A no puede ver el pedido de B (HTTP 404)
+  OK   - No se reveló ningún dato del pedido de B
+  OK   - El listado de A no incluye pedidos de B (comparado por id_pedido)
+  OK   - Inyección SQL en el id (HTTP 400)
+  OK   - id inexistente (HTTP 404)
+  OK   - Detalle sin sesión (HTTP 401)
+  OK   - GET en crear.php (HTTP 405)
+  OK   - POST en listar.php (HTTP 405)
+== 10) EL CLIENTE NO PUEDE IMPONER DATOS (id_usuario, estado, total, precio, envío) ==
+  OK   - Se crea el pedido ignorando esos campos (HTTP 201)
+  OK   - id_usuario = el de la sesión (A), no el que mandó el cliente (2)
+  OK   - estado = pendiente (no 'pagado') (pendiente)
+  OK   - total calculado por el servidor (521.10 + envío 50), no 1 (571.10)
+== 11) ESTADOS ==
+  OK   - El ENUM admite los 5 estados (pendiente,pagado,enviado,completado,cancelado)
+  (Nota: el Bloque 3 no incluye endpoints de cambio de estado ni de cancelación; eso corresponde al Bloque 5/admin.)
+
+================================================================
+RESULTADO FINAL: 46 pruebas OK, 0 con FALLA
+================================================================
+
+################ test_concurrencia ################
+
+== Dos usuarios, 2 unidades c/u, stock 2 ==
+  códigos HTTP: ['409', '201']
+  OK   - exactamente 1 checkout(s) exitoso(s) (hubo 1)
+  OK   - el resto fue rechazado por stock (409)
+  OK   - stock final = 0, NUNCA negativo
+  OK   - se crearon solo los pedidos exitosos
+
+== Tres usuarios, 1 unidad c/u, stock 2 ==
+  códigos HTTP: ['201', '201', '409']
+  OK   - exactamente 2 checkout(s) exitoso(s) (hubo 2)
+  OK   - el resto fue rechazado por stock (409)
+  OK   - stock final = 0, NUNCA negativo
+  OK   - se crearon solo los pedidos exitosos
+
+RESULTADO FINAL: TODO CORRECTO
+
+################ test_navegador_bloque3 ################
+1) Checkout sin sesión
+  OK   - redirige a login conservando next=checkout
+2) Registro desde el checkout
+  OK   - tras registrarse vuelve a checkout.html (no a index.html)
+  OK   - con el carrito vacío lo avisa en vez de mostrar un resumen roto
+3) Carrito con sesión
+  OK   - la nota 'el checkout se habilita en la próxima etapa' ya no aparece (texto: '')
+  OK   - hay 2 productos en el carrito (MySQL)
+4) Continuar Compra -> checkout
+  OK   - muestra el nombre de la sesión
+  OK   - muestra el correo de la sesión
+  OK   - total del resumen = S/. 923.24 (obtuvo S/. 923.24)
+5) Dirección inválida
+  OK   - muestra error si la dirección está vacía
+6) Confirmar pedido
+  OK   - aparece '¡Gracias por tu compra!'
+  OK   - el formulario y el resumen QUEDAN OCULTOS tras confirmar (bug B-02)
+   pedido #1
+7) Carrito vacío tras el pedido
+  OK   - el carrito quedó vacío en MySQL (items: 0)
+  OK   - y la página no muestra productos
+8) Mis Compras
+  OK   - lista 1 pedido
+  OK   - estado 'Pendiente'
+  OK   - el detalle muestra los 2 productos
+  OK   - el detalle muestra la dirección
+  OK   - el modal de pedido se cierra con la ×
+9) XSS: una dirección maliciosa se muestra como texto, no se ejecuta
+  OK   - no se ejecutó el script inyectado
+  OK   - la dirección aparece como texto literal
+10) Cerrar sesión y Mis Compras sin sesión
+Traceback (most recent call last):
+  File "/home/claude/baseline-run/tests/test_navegador_bloque3.py", line 132, in <module>
+    asyncio.run(main())
+    ~~~~~~~~~~~^^^^^^^^
+  File "/usr/local/lib/python3.13/asyncio/runners.py", line 196, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.13/asyncio/runners.py", line 119, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.13/asyncio/base_events.py", line 726, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/claude/baseline-run/tests/test_navegador_bloque3.py", line 116, in main
+    await page.goto(f"{BASE}/mis-compras.html"); await page.wait_for_url("**iniciarsesion.html**")
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/playwright/async_api/_generated.py", line 9901, in goto
+    await self._impl_obj.goto(
+    ...<4 lines>...
+    )
+  File "/usr/local/lib/python3.13/site-packages/playwright/_impl/_page.py", line 562, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/playwright/_impl/_frame.py", line 157, in goto
+    await self._channel.send(
+        "goto", self._navigation_timeout, locals_to_params(locals())
+    )
+  File "/usr/local/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Page.goto: Navigation to "http://localhost:8080/mis-compras.html" is interrupted by another navigation to "http://localhost:8080/iniciorsesion/iniciarsesion.html?next=mis-compras"
+Call log:
+  - navigating to "http://localhost:8080/mis-compras.html", waiting until "load"
+
+
+Suites con fallas: 1

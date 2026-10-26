@@ -1,85 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Iniciá sesión o creá tu cuenta en Capi-Barato.">
+    <link rel="icon" href="../img/logo/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/logo/favicon-32.png">
+    <link rel="apple-touch-icon" href="../img/logo/apple-touch-icon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="sesion.css">
-    <title>capi-Barato</title>
+    <title>Iniciar sesión - Capi-Barato</title>
 </head>
 <body>
-    <div class="login-container">
-        <form id="login-form">
-            <input type="checkbox" class="input-check" id="input-check">
-            <label for="input-check" class="toggle">
-                <span class="text off">Off</span>
-                <span class="text on">On</span>
-            </label>
-            <div class="login-light"></div>
-            <h2>Register</h2>
+    <div class="sesion-layout">
+        <!-- Panel izquierdo: una sola imagen de marca (logo, eslogan y beneficios
+             ya vienen dentro del archivo; no se superpone ningún texto encima). -->
+        <aside class="sesion-visual">
+            <img src="../img/capi-barato-login-lateral_final_1.png"
+                 alt="Tienda Capi-Barato: todo lo que necesitas, en un solo lugar. Envíos a todo el Perú, compras seguras, los mejores precios y productos de calidad.">
+        </aside>
 
-            <!-- EMAIL -->
-            <div class="input-box">
-                <span class="icon">
-                    <ion-icon name="mail"></ion-icon>
-                </span>
-                <input type="email" id="email" required>
-                <label>Email</label>
-                <div class="input-line"></div>
-            </div>
+        <section class="sesion-panel">
+            <span class="panel-deco" aria-hidden="true"></span>
+            <span class="panel-deco-suave" aria-hidden="true"></span>
 
-            <!-- PASSWORD -->
-            <div class="input-box">
-                <span class="icon">
-                    <ion-icon name="lock-closed"></ion-icon>
-                </span>
-                <input type="password" id="password" required>
-                <label>Password</label>
-                <div class="input-line"></div>
-            </div>
+            <a href="../index.html" class="volver-inicio"><i class="bi bi-arrow-left"></i> Volver a la tienda</a>
 
-            <!-- REMEMBER -->
-            <div class="remember-forgot">
-                <label> 
-                    <input type="checkbox">
-                    Remember Me
-                </label>
-                <a href="#">Forgot Password?</a>
-            </div>
+            <p class="panel-top">
+                <span class="panel-top-texto">¿Aún no tienes cuenta?</span>
+                <button type="button" id="tab-registro">Crear cuenta <i class="bi bi-arrow-right"></i></button>
+                <button type="button" id="tab-login" hidden>Iniciar sesión <i class="bi bi-arrow-right"></i></button>
+            </p>
 
-            <!-- BOTÓN -->
-            <button type="submit">CAPI-BARATO</button>
+            <main class="panel-contenido">
+                <header class="marca">
+                    <img class="marca-logo" src="../img/logo/capi-barato-logo.png" alt="Capi-Barato, tienda online">
+                    <p class="marca-nombre">Capi-<span>Barato</span></p>
+                    <p class="marca-sub" id="marca-sub">Ingresa a tu cuenta para continuar</p>
+                </header>
 
-            <div class="register-link">
-                <p>Don't have an account? <a href="#">Register</a></p>
-            </div>
-        </form>
+                <div class="sesion-card">
+                    <form id="form-login" class="formulario activo" novalidate>
+                        <div class="campo">
+                            <label for="login-email">Correo electrónico</label>
+                            <div class="campo-control">
+                                <i class="bi bi-envelope icon" aria-hidden="true"></i>
+                                <input type="email" id="login-email" placeholder="tucorreo@ejemplo.com" autocomplete="email" required>
+                            </div>
+                        </div>
+
+                        <div class="campo">
+                            <label for="login-password">Contraseña</label>
+                            <div class="campo-control">
+                                <i class="bi bi-lock icon" aria-hidden="true"></i>
+                                <input type="password" id="login-password" placeholder="Ingresa tu contraseña" autocomplete="current-password" required minlength="6">
+                                <button type="button" class="ver-password" data-objetivo="login-password" aria-label="Mostrar contraseña" aria-pressed="false">
+                                    <i class="bi bi-eye-slash" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <span class="mensaje-error" id="error-login" role="alert"></span>
+
+                        <div class="remember-forgot">
+                            <label class="recordarme"><input type="checkbox" id="login-recordar"> Recordarme</label>
+                            <a href="#" id="link-olvidaste">¿Olvidaste tu contraseña?</a>
+                        </div>
+
+                        <button type="submit" class="btn-principal">
+                            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            <span class="btn-texto">Iniciar sesión</span>
+                        </button>
+
+                        <p class="link-cambiar-formulario">¿No tienes cuenta? <button type="button" id="btn-ir-registro">Crear una cuenta</button></p>
+                    </form>
+
+                    <form id="form-registro" class="formulario" novalidate>
+                        <div class="campo">
+                            <label for="registro-nombre">Nombre completo</label>
+                            <div class="campo-control">
+                                <i class="bi bi-person icon" aria-hidden="true"></i>
+                                <input type="text" id="registro-nombre" placeholder="Tu nombre y apellido" autocomplete="name" required minlength="2">
+                            </div>
+                        </div>
+
+                        <div class="campo">
+                            <label for="registro-email">Correo electrónico</label>
+                            <div class="campo-control">
+                                <i class="bi bi-envelope icon" aria-hidden="true"></i>
+                                <input type="email" id="registro-email" placeholder="tucorreo@ejemplo.com" autocomplete="email" required>
+                            </div>
+                        </div>
+
+                        <div class="campo">
+                            <label for="registro-password">Contraseña</label>
+                            <div class="campo-control">
+                                <i class="bi bi-lock icon" aria-hidden="true"></i>
+                                <input type="password" id="registro-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required minlength="6">
+                                <button type="button" class="ver-password" data-objetivo="registro-password" aria-label="Mostrar contraseña" aria-pressed="false">
+                                    <i class="bi bi-eye-slash" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="campo">
+                            <label for="registro-confirmar">Confirmar contraseña</label>
+                            <div class="campo-control">
+                                <i class="bi bi-lock-fill icon" aria-hidden="true"></i>
+                                <input type="password" id="registro-confirmar" placeholder="Repite tu contraseña" autocomplete="new-password" required minlength="6">
+                                <button type="button" class="ver-password" data-objetivo="registro-confirmar" aria-label="Mostrar contraseña" aria-pressed="false">
+                                    <i class="bi bi-eye-slash" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <span class="mensaje-error" id="error-registro" role="alert"></span>
+
+                        <button type="submit" class="btn-principal">
+                            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            <span class="btn-texto">Crear cuenta</span>
+                        </button>
+
+                        <p class="link-cambiar-formulario">¿Ya tienes cuenta? <button type="button" id="btn-ir-login">Iniciar sesión</button></p>
+                    </form>
+                </div>
+            </main>
+        </section>
     </div>
 
-    <!-- Iconos -->
-    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-
-    <!-- Validación y redirección -->
-    <script>
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault(); // Previene el envío por defecto
-
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-
-            // Validar formato de email con expresión regular
-            const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
-            if (!email || !password) {
-                alert('Por favor completa el email y la contraseña.');
-            } else if (!emailRegex.test(email)) {
-                alert('Por favor ingresa un email válido.');
-            } else {
-                // Redirige si todo está bien
-                window.location.href = '../index.html';
-            }
-        });
-    </script>
+    <script src="../js/carrito-api.js"></script>
+    <script src="sesion.js"></script>
 </body>
 </html>

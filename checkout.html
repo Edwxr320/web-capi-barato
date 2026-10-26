@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Finalizá tu compra en Capi-Barato.">
+    <link rel="icon" href="img/logo/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/logo/favicon-32.png">
+    <link rel="apple-touch-icon" href="img/logo/apple-touch-icon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./css/estilo.css">
+    <title>Finalizar compra - Capi-Barato</title>
+</head>
+<body>
+    <div class="container">
+        <div class="container-header">
+            <header class="header">
+                <button type="button" class="btn-menu" id="btn-menu-cabecera"
+                        aria-expanded="false" aria-controls="menu-cabecera" aria-label="Abrir menú">
+                    <i class="bi bi-list" aria-hidden="true"></i>
+                </button>
+
+                <div class="container-logo">
+                    <a href="index.html" aria-label="Capi-Barato, ir al inicio">
+                        <img src="img/logo/capi-barato-logo-horizontal.png" alt="Capi-Barato, tienda online" class="logo">
+                    </a>
+                </div>
+
+                <form class="container-search" id="form-buscador" role="search">
+                    <div class="input">
+                        <input type="search" id="input-buscador" name="buscar" placeholder="Buscar productos, marcas y modelos" aria-label="Buscar productos, marcas y modelos" autocomplete="off">
+                        <button type="submit" class="icono-busqueda" aria-label="Buscar">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <a class="header-carrito" href="carrito.html" aria-label="Ver carrito de compras">
+                    <i class="bi bi-cart icono-carrito" aria-hidden="true"></i>
+                    <span class="num-en-carrito" id="num-en-carrito">0</span>
+                </a>
+
+                <!-- En escritorio este bloque es `display:contents`: sus hijos se colocan
+                     directamente en la rejilla del encabezado. En móvil se convierte en el
+                     panel desplegable que abre el botón de menú. -->
+                <div class="header-menu" id="menu-cabecera">
+                    <div class="container-ubicacion">
+                        <a href="https://www.google.com/maps?ll=-9.243538,-75.019505&amp;z=2&amp;t=m&amp;hl=es-419&amp;gl=PE&amp;mapclient=embed&amp;q=Per%C3%BA" target="_blank" rel="noopener">
+                            <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+                            <span class="txt-enviar">Enviar a</span>
+                            <span class="txt-lugar">Elegir ubicación <i class="bi bi-chevron-down" aria-hidden="true"></i></span>
+                        </a>
+                    </div>
+
+                    <p class="header-envios">
+                        <span class="header-envios-icono"><i class="bi bi-truck" aria-hidden="true"></i></span>
+                        <span class="header-envios-txt">
+                            <strong>Envíos a todo el Perú</strong>
+                            <small>Rápido y seguro</small>
+                        </span>
+                    </p>
+
+                    <a class="btn-acceso" id="btn-acceso" href="iniciorsesion/iniciarsesion.html">
+                        <i class="bi bi-person-fill" aria-hidden="true"></i> Iniciar sesión
+                    </a>
+
+                    <div class="header-fila2">
+                        <div class="nav-menu">
+                            <a href="carrito.html" class="boton-categoria"><i class="bi bi-arrow-left"></i> Volver al carrito</a>
+                        </div>
+
+                        <div class="info-user">
+                            <a href="iniciorsesion/iniciarsesion.html"><i class="bi bi-person" aria-hidden="true"></i><span class="txt-cuenta">Creá tu cuenta</span></a>
+                            <a href="https://forms.gle/uk5osUqwpN9aLhrJ9" target="_blank" rel="noopener"><i class="bi bi-star" aria-hidden="true"></i>Califíquenos</a>
+                            <a href="mis-compras.html"><i class="bi bi-bag" aria-hidden="true"></i>Mis Compras</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        </div>
+
+        <noscript>
+            <p class="noscript-mensaje">Capi-Barato necesita JavaScript habilitado en tu navegador para finalizar la compra.</p>
+        </noscript>
+
+        <main>
+            <h2 class="titulo-seccion">Finalizar compra</h2>
+
+            <div class="contenedor-checkout" id="contenedor-checkout">
+                <div class="checkout-datos">
+                    <div class="checkout-seccion">
+                        <h3>Datos de contacto</h3>
+                        <p id="checkout-nombre">Nombre: —</p>
+                        <p id="checkout-email">Correo: —</p>
+                    </div>
+                    <div class="checkout-seccion">
+                        <h3>Dirección de envío</h3>
+                        <textarea id="checkout-direccion" placeholder="Calle, número, distrito, referencia..." aria-label="Dirección de envío" maxlength="255"></textarea>
+                        <span class="mensaje-stock" id="checkout-error" role="alert"></span>
+                    </div>
+                </div>
+
+                <div class="carrito-resumen-compra" id="checkout-resumen">
+                    <div class="carrito-resumen-compra-titulo">
+                        <span>Resumen del pedido</span>
+                    </div>
+                    <div id="checkout-items-resumen"></div>
+                    <div class="carrito-resumen-total-compra item-resumen">
+                        <span>Productos(<span id="checkout-cant-productos">0</span>)</span>
+                        <span id="checkout-subtotal">S/. 0.00</span>
+                    </div>
+                    <div class="carrito-resumen-total-envio item-resumen">
+                        <span>Envío</span>
+                        <span id="checkout-envio">S/. 0.00</span>
+                    </div>
+                    <div class="carrito-resumen-total-final item-resumen">
+                        <span>Total</span>
+                        <span id="checkout-total">S/. 0.00</span>
+                    </div>
+                    <div class="item-resumen">
+                        <button class="carrito-acciones-comprar" id="btn-confirmar-pedido">Confirmar pedido</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-confirmacion" id="checkout-confirmacion" hidden>
+                <i class="bi bi-check-circle"></i>
+                <h2>¡Gracias por tu compra!</h2>
+                <p>Tu pedido <strong id="confirmacion-numero"></strong> quedó registrado como <strong>pendiente</strong>.</p>
+                <div class="checkout-confirmacion-acciones">
+                    <a href="mis-compras.html">Ver Mis Compras</a>
+                    <a href="index.html">Seguir comprando</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="./js/cabecera.js"></script>
+    <script src="./js/carrito-api.js"></script>
+    <script src="./js/checkout.js"></script>
+</body>
+</html>

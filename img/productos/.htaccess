@@ -1,0 +1,7 @@
+# Carpeta de imágenes subidas desde el panel. Aunque el servidor solo guarda PNG/JPG/WebP con nombre
+# aleatorio, por las dudas se impide ejecutar scripts aquí en Apache.
+<FilesMatch "\.(php|phtml|php[0-9]|phar|cgi|pl|py|sh)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes -ExecCGI
+RemoveHandler .php .phtml .phar

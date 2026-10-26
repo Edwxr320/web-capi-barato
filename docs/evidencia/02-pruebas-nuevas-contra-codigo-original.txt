@@ -1,0 +1,198 @@
+== 1) CHECKOUT: carrito vacío / sin sesión / dirección ==
+  OK   - Carrito vacío (HTTP 400)
+  OK   - Sin sesión (HTTP 401)
+  OK   - Cookie de sesión inventada (HTTP 401)
+  OK   - Dirección ausente (HTTP 400)
+  OK   - Dirección vacía (HTTP 400)
+  OK   - Dirección solo con espacios (HTTP 400)
+  OK   - Dirección demasiado corta (2 caracteres) (HTTP 400)
+  FALLA - Dirección como lista (tipo inválido) (esperaba HTTP 400, obtuvo HTTP 201)
+  OK   - Dirección como número (tipo inválido) (HTTP 400)
+  OK   - Dirección de 256 caracteres (máximo 255) (HTTP 400)
+  OK   - Cuerpo que no es JSON (HTTP 400)
+  FALLA - Ninguno de esos rechazos creó un pedido (esperaba '0', obtuvo '1')
+  FALLA - …ni vació el carrito de A (esperaba '1', obtuvo '0')
+== 2) CHECKOUT EXITOSO + CONSISTENCIA EN MYSQL ==
+  FALLA - Checkout (esperaba HTTP 201, obtuvo HTTP 400)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; d=json.load(sys.stdin); print(d["pedido"]["id_pedido"])
+                                                   ~^^^^^^^^^^
+KeyError: 'pedido'
+--------------
+SELECT COUNT(*) FROM pedidos WHERE id_pedido=
+--------------
+
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+  FALLA - Pedido existe (esperaba '1', obtuvo '')
+--------------
+SELECT COUNT(*) FROM detalle_pedido WHERE id_pedido=
+--------------
+
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+  FALLA - Detalle existe (1 línea) (esperaba '1', obtuvo '')
+--------------
+SELECT CONCAT(cantidad,'|',precio_unitario,'|',subtotal) FROM detalle_pedido WHERE id_pedido=
+--------------
+
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+  FALLA - Detalle: cantidad 1, precio unitario 429.14, subtotal 429.14 (esperaba '1|429.14|429.14', obtuvo '')
+  FALLA - Stock descontado (esperaba '98', obtuvo '99')
+  OK   - Carrito vaciado (0)
+--------------
+SELECT CONCAT(subtotal,'|',costo_envio,'|',total) FROM pedidos WHERE id_pedido=
+--------------
+
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+  FALLA - Pedido: subtotal|envío|total (esperaba '429.14|0.00|429.14', obtuvo '')
+--------------
+SELECT p.total = p.subtotal + p.costo_envio AND p.subtotal = (SELECT SUM(subtotal) FROM detalle_pedido WHERE id_pedido=p.id_pedido) FROM pedidos p WHERE id_pedido=
+--------------
+
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+  FALLA - total = subtotal + envío, y subtotal = suma del detalle (esperaba '1', obtuvo '')
+--------------
+SELECT estado FROM pedidos WHERE id_pedido=
+--------------
+
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+  FALLA - Estado inicial (esperaba 'pendiente', obtuvo '')
+--------------
+SELECT id_usuario FROM pedidos WHERE id_pedido=
+--------------
+
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+  FALLA - Pedido de A pertenece a A (esperaba '2', obtuvo '')
+--------------
+SELECT direccion_envio FROM pedidos WHERE id_pedido=
+--------------
+
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+  FALLA - Dirección guardada (esperaba 'Av. Javier Prado 456, San Isidro, Lima', obtuvo '')
+  OK   - Repetir el checkout con el carrito ya vacío (HTTP 400)
+== 3) PRECIO HISTÓRICO ==
+  OK   - El catálogo ya muestra el precio nuevo (999)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; d=json.load(sys.stdin); print(d["pedido"]["items"][0]["precio_unitario"])
+                                                   ~^^^^^^^^^^
+KeyError: 'pedido'
+  FALLA - El pedido conserva el precio unitario de la compra (esperaba '429.14', obtuvo '')
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; d=json.load(sys.stdin); print(d["pedido"]["total"])
+                                                   ~^^^^^^^^^^
+KeyError: 'pedido'
+  FALLA - …y el total original (esperaba '429.14', obtuvo '')
+--------------
+SELECT precio_unitario FROM detalle_pedido WHERE id_pedido=
+--------------
+
+ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+  FALLA - En MySQL detalle_pedido.precio_unitario no cambió (esperaba '429.14', obtuvo '')
+  OK   - Precio del producto 1 restaurado (429.14)
+== 4) STOCK INSUFICIENTE (validación previa, antes de escribir) ==
+  OK   - Stock insuficiente (HTTP 409)
+  OK   - El mensaje dice qué producto tiene el problema
+  OK   - No se creó pedido (0)
+  OK   - Stock intacto (2)
+== 5) VARIOS PRODUCTOS: uno OK + otro sin stock (validación previa, sin escrituras) ==
+  OK   - El checkout completo falla (HTTP 409)
+  OK   - Base idéntica: pedidos, detalle, stock de todos los productos y carritos (1|1|1:99,2:21,3:21,4:21,5:2,6:35,7:35,8:35,9:10,10:10,11:10,12:10|3:2:1,3:5:3)
+== 6) ROLLBACK REAL: falla del servidor A MITAD de la transacción ==
+  OK   - 6a) Falla en el detalle del 2º producto -> error de servidor (HTTP 500)
+  FALLA - 6a) La respuesta sigue siendo JSON (obtuvo 'False')
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; d=json.load(sys.stdin); print("FALLA_SIMULADA" not in d["error"] and "SQLSTATE" not in d["error"])
+                       ~~~~~~~~~^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/local/lib/python3.13/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/local/lib/python3.13/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/json/decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 2 column 1 (char 1)
+  FALLA - 6a) No filtra el error interno de MySQL (obtuvo '')
+  OK   - 6a) ROLLBACK: pedidos, detalle, stock (prod. 2 incluido) y carrito idénticos a antes (1|1|1:99,2:21,3:21,4:21,5:2,6:35,7:35,8:35,9:10,10:10,11:10,12:10|3:2:1,3:7:2)
+  OK   - 6b) Falla al descontar stock del 2º producto -> error de servidor (HTTP 500)
+  OK   - 6b) ROLLBACK completo (1|1|1:99,2:21,3:21,4:21,5:2,6:35,7:35,8:35,9:10,10:10,11:10,12:10|3:2:1,3:7:2)
+  OK   - 6c) Falla al vaciar el carrito -> error de servidor (HTTP 500)
+  OK   - 6c) ROLLBACK completo (no queda pedido sin carrito vaciado ni stock descontado) (1|1|1:99,2:21,3:21,4:21,5:2,6:35,7:35,8:35,9:10,10:10,11:10,12:10|3:2:1,3:7:2)
+  OK   - Triggers de prueba eliminados (0)
+  OK   - Sin la falla simulada, el mismo carrito se compra normalmente (HTTP 201)
+  OK   - …con 2 líneas de detalle (2)
+== 7) PRODUCTO DESACTIVADO CON EL CARRITO ARMADO ==
+  OK   - Producto desactivado rechazado (HTTP 409)
+  OK   - El mensaje nombra el producto desactivado
+  OK   - Nada cambió (tampoco el producto activo del mismo carrito) (2|3|1:99,2:20,3:21,4:21,5:2,6:35,7:33,8:35,9:10,10:10,11:10,12:10|3:1:1,3:3:1)
+== 8) ENVÍO EN UN CHECKOUT REAL ==
+  OK   - Checkout con envíos S/50 y S/100 (HTTP 201)
+  OK   - Envío = el mayor (100), no la suma (150) (100)
+  OK   - Subtotal (463.97 + 583.27) (1047.24)
+  OK   - Total (1147.24)
+  OK   - En MySQL: envío 100.00, total 1147.24 (100.00|1147.24)
+  OK   - Un producto con envío pago y 3 unidades: envío S/50 una sola vez (50)
+  OK   - …total = 3 × 463.97 + 50 (1441.91)
+  OK   - Todo con envío gratis = S/0.00 (0)
+  OK   - …total = 5 × 429.14 + 2 × 494.10 (3133.9)
+== 9) HISTORIAL ==
+  OK   - A ve exactamente 1 pedido (1)
+  FALLA - B ve sus pedidos del más reciente al más antiguo (obtuvo 'False')
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; d=json.load(sys.stdin); print(d["pedido"]["direccion_envio"])
+                                                   ~^^^^^^^^^^
+KeyError: 'pedido'
+  FALLA - Detalle: dirección (esperaba 'Av. Javier Prado 456, San Isidro, Lima', obtuvo '')
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json,sys; d=json.load(sys.stdin); print(len(d["pedido"]["items"]))
+                                                       ~^^^^^^^^^^
+KeyError: 'pedido'
+  FALLA - Detalle: 1 ítem (esperaba '1', obtuvo '')
+== 10) SEGURIDAD: pedidos ajenos, inyección, métodos ==
+  OK   - A no puede ver el pedido de B (HTTP 404)
+  OK   - La respuesta es IDÉNTICA a la de un pedido inexistente (no revela que existe) ({"error":"Pedido no encontrado."})
+  OK   - El listado de A no incluye pedidos de B (comparado por id_pedido)
+  OK   - Inyección SQL en el id (HTTP 400)
+  OK   - id negativo (HTTP 400)
+  OK   - Detalle sin sesión (HTTP 401)
+  OK   - Listado sin sesión (HTTP 401)
+  OK   - GET en crear.php (HTTP 405)
+  OK   - POST en listar.php (HTTP 405)
+  OK   - POST en detalle.php (HTTP 405)
+  OK   - Checkout con la cookie de una sesión ya cerrada (HTTP 401)
+== 11) INYECCIÓN SQL Y XSS EN LA DIRECCIÓN (se guardan como texto literal) ==
+  OK   - Dirección con SQL: se acepta como texto (HTTP 201)
+  OK   - La tabla pedidos sigue existiendo (1)
+  OK   - …y la dirección quedó guardada literalmente (Calle 1'); DROP TABLE pedidos; -- " OR 1=1)
+  OK   - La API responde como JSON (no como HTML) (content-type: application/json; charset=utf-8)
+  OK   - La API devuelve el texto tal cual (el escape es tarea de la vista; se prueba en el navegador) (<img src=x onerror="alert(1)"><script>alert(2)</script>)
+== 12) EL CLIENTE NO PUEDE IMPONER DATOS (id_usuario, estado, total, precio, envío) ==
+  OK   - El carrito ignoró id_usuario/precio del cliente: el ítem quedó en el carrito de A (1)
+  OK   - Se crea el pedido ignorando esos campos (HTTP 201)
+  OK   - id_usuario = el de la sesión (A), no el que mandó el cliente (2)
+  OK   - estado = pendiente (no 'pagado') (pendiente)
+  OK   - total calculado por el servidor (521.10 + envío 50), no 1 (571.10)
+  OK   - precio_unitario del servidor, no 1 (521.10)
+  OK   - B no recibió ningún pedido nuevo de A (4)
+== 13) INTEGRIDAD GLOBAL DE TODOS LOS PEDIDOS CREADOS ==
+  OK   - Ningún stock negativo (0)
+  OK   - Todo pedido tiene al menos una línea de detalle (0)
+  OK   - En todo pedido: subtotal = Σ detalle y total = subtotal + envío (0)
+  OK   - En todo detalle: subtotal = cantidad × precio_unitario (0)
+== 14) ESTADOS ==
+  OK   - El ENUM admite los 5 estados (pendiente,pagado,enviado,completado,cancelado)
+
+================================================================
+RESULTADO FINAL: 70 pruebas OK, 21 con FALLA
+================================================================
+Nota: con el código original, el pedido #1 quedó guardado con direccion_envio='Array' (consulta: SELECT id_pedido,direccion_envio FROM pedidos).

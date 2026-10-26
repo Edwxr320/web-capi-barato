@@ -1,0 +1,17 @@
+<svg viewBox="0 0 678 76" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tituloPublicidad">
+  <title id="tituloPublicidad">Ofertas Capi-Barato: los mejores precios en tecnología, todos los días</title>
+  <rect width="678" height="76" fill="#fff159"/>
+
+  <!-- Ícono tipo etiqueta de descuento -->
+  <g transform="translate(20, 18)">
+    <path d="M2 18 L2 4 C2 2.9 2.9 2 4 2 L18 2 L38 22 L22 38 L2 18Z" fill="none" stroke="#3483fa" stroke-width="3.2" stroke-linejoin="round"/>
+    <circle cx="11" cy="11" r="3.4" fill="#3483fa"/>
+  </g>
+
+  <text x="70" y="32" font-family="Figtree, 'Segoe UI', Arial, sans-serif" font-size="19" font-weight="700" fill="#1a1a1a">Ofertas Capi-Barato</text>
+  <text x="70" y="52" font-family="Figtree, 'Segoe UI', Arial, sans-serif" font-size="13.5" fill="#3a3a3a">Los mejores precios en tecnología, todos los días</text>
+
+  <!-- Bloque CTA -->
+  <rect x="486" y="14" width="172" height="48" rx="10" fill="#3483fa"/>
+  <text x="572" y="43" text-anchor="middle" font-family="Figtree, 'Segoe UI', Arial, sans-serif" font-size="15.5" font-weight="700" fill="#ffffff">Ver catálogo</text>
+</svg>

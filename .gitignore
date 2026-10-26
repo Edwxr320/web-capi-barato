@@ -1,0 +1,16 @@
+# Credenciales locales reales -- nunca se suben al repositorio.
+# Cada quien copia api/config/config.example.php como api/config/config.php
+# y completa sus propios datos locales.
+api/config/config.php
+
+# Salidas generadas por las pruebas (logs del servidor, log de run_all y capturas).
+# Se regeneran con tests/run_all.sh y tests/test_responsive.py; no forman parte del código.
+tests/resultados/
+
+# Configuraciones y temporales del sistema operativo / editor.
+Thumbs.db
+desktop.ini
+.DS_Store
+*.bak
+*.tmp
+*~

@@ -1,0 +1,5 @@
+# Ningún archivo de esta carpeta debe poder pedirse directamente por navegador/HTTP.
+# Es una capa extra de seguridad -- aunque config.php ya no imprime nada al ejecutarse
+# como script suelto, esto evita cualquier fuga si el servidor llegara a estar mal
+# configurado (por ejemplo, sirviendo .php como texto plano en vez de ejecutarlo).
+Require all denied

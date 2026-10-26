@@ -1,477 +1,379 @@
-//Arreglo que contiene los productos
-const productos = [
-    {
-        id:"celular-01",
-        titulo:"Moto G13 Dual Sim 128 Gb Azul Difuso 4 Gb Ram",
-        imagen: [
-            "./img/celulares/11.png",
-            "./img/celulares/12.png",
-            "./img/celulares/13.png"
-        ], 
-        categoria:{
-            nombre:"Celulares",
-            id:"celulares"
-        },
-        precio:499,
-        descuento:14,
-        informacion:[
-            "Pantalla IPS de 6.5.",
-            "Camara trasea 13Mpx.",
-            "Cámra delantera 5Mpx",
-            "Procesaor 1.66 Gh con 2GB de RAM.",
-            "Batería interna 54 GB.",
-            "Con reconocimiento facia.l"
-        ],
-        envio: "Envío Gratis",
-        stock:100,
-        proveedor:"OVERHARD",
-    },
-    {
-        id:"celular-02",
-        titulo:"Moto E22 64gb 4gb Ram Negro Test",
-        imagen: [
-            "./img/celulares/21.png",
-            "./img/celulares/22.png",
-            "./img/celulares/23.png"
-        ], 
-        categoria:{
-            nombre:"Celulares",
-            id:"celulares"
-        },
-        precio:559,
-        descuento:17,
-        informacion:[
-            "Dispositivo liberado para que elijas la compañía telefónica que prefieras",
-            "Pantalla de 6.5",
-            "Cámra delantera 5Mpx",
-            "Procesaor 1.66 Gh con 2GB de RAM.",
-            "Batería 4020m.",
-            "Memoria interna de 54 GB"
-        ],
-        envio: 50,
-        stock:21,
-        proveedor:"OVERHARD",
-    },
-    {
-        id:"celular-03",
-        titulo:"Samsung A04s 128 GB negro 4 GB RAM",
-        imagen: [
-            "./img/celulares/31.png",
-            "./img/celulares/32.png",
-            "./img/celulares/33.png"
-        ], 
-        categoria:{
-            nombre:"Celulares",
-            id:"celulares"
-        },
-        precio:579,
-        descuento:10,
-        informacion:[
-            "Dispositivo liberado para que elijas la compañía telefónica que prefieras.",
-            "Pantalla PLS de 6.5'.",
-            "Tiene 3 cámaras traseras de 50Mpx/2Mpx/2Mpx.",
-            "Cámara delantera de 5Mpx.",
-            "Procesador Exynos 850 Octa-Core de 2GHz con 4GB de RAM.",
-            "Batería de 5000mAh.",
-            "Memoria interna de 128GB.",
-            "Con reconocimiento facial y sensor de huella dactilar."
-        ],
-        envio: 50,
-        stock:21,
-        proveedor:"DIGIT",
-    },
-    {
-        id:"celular-04",
-        titulo:"Samsung Galaxy A04s 128 GB blanco 4 GB RAM",
-        imagen: [
-            "./img/celulares/41.png",
-            "./img/celulares/42.png",
-            "./img/celulares/43.png"
-        ], 
-        categoria:{
-            nombre:"Celulares",
-            id:"celulares"
-        },
-        precio:709,
-        descuento:13,
-        informacion:[
-            "Dispositivo liberado para que elijas la compañía telefónica que prefieras.",
-            "Pantalla PLS de 6.5'.",
-            "Tiene 3 cámaras traseras de 50Mpx/2Mpx/2Mpx.",
-            "Cámara delantera de 5Mpx.",
-            "Procesador Exynos 850 Octa-Core de 2GHz con 4GB de RAM.",
-            "Batería de 5000mAh.",
-            "Memoria interna de 128GB.",
-            "Con reconocimiento facial y sensor de huella dactilar."
-        ],
-        envio: "Envío Gratis",
-        stock:21,
-        proveedor:"DIGIT",
-    },
-    {
-        id:"notebook-01",
-        titulo:"Samsung Galaxy Book3 15.6 Intel Core I3 6 Núcleos 8gb 256gb Color Silver",
-        imagen: [
-            "./img/notebooks/11.png",
-            "./img/notebooks/12.png",
-            "./img/notebooks/13.png",
-        ], 
-        categoria:{
-            nombre:"Notebooks",
-            id:"notebooks"
-        },
-        precio:1349,
-        descuento:13,
-        informacion:[
-            "Procesador Intel i3",
-            "Memoria RAM de 8GB.",
-            "Resolución de FHD",
-            "Placa de video Intel Iris Xe",
-            "Cuenta con puerto USB y puerto HDMI"
-        ],
-        envio: "Envío Gratis",
-        stock:2,
-        proveedor:"ECOMODICO",
-    },
-    {
-        id:"notebook-02",
-        titulo:"Notebook Noblex N14x1000 14.1 Hd Intel Celeron 4gb/128gb Color Gris",
-        imagen: [
-            "./img/notebooks/21.png",
-            "./img/notebooks/22.png",
-            "./img/notebooks/23.png",
-        ], 
-        categoria:{
-            nombre:"Notebooks",
-            id:"notebooks"
-        },
-        precio: 1291,
-        descuento:34,
-        informacion:[
-            "Procesador Intel Celeron.",
-            "Memoria RAM de 4GB.",
-            "Resolución de 1366x768 px.",
-            "Conexión wifi y bluetooth.",
-            "Cuenta con 2 puertos USB y puerto HDMI.",
-            "La duración de la batería depende del uso que se le dé al producto."
-        ],
-        envio: "Envío Gratis",
-        stock:35,
-        proveedor:"Tienda New Sound",
-    },
-    {
-        id:"notebook-03",
-        titulo:"Notebook Hp 15-dy2061la Intel Core I3 1125g4 8gb 256gb Win10 Color Plateado",
-        imagen: [
-            "./img/notebooks/31.png",
-            "./img/notebooks/32.png",
-            "./img/notebooks/33.png",
-        ], 
-        categoria:{
-            nombre:"Notebooks",
-            id:"notebooks"
-        },
-        precio:1649,
-        descuento:47,
-        informacion:[
-            "Procesador Intel Core i3.",
-            "Memoria RAM de 8GB.",
-            "Resolución de 1366x768 px.",
-            "Placa de video Intel UHD Graphics Xe G4 48EUs.",
-            "Conexión wifi y bluetooth.",
-            "Cuenta con 3 puertos USB y puerto HDMI.",
-            "Incluye lector de tarjeta de memoria.",
-            "Posee pad numérico.",
-            "Modo de sonido Stereo.",
-            "La duración de la batería depende del uso que se le dé al producto."
-        ],
-        envio: "Envío Gratis",
-        stock:35,
-        proveedor:"HP TIENDA OFICIAL",
-    },
-    {
-        id:"notebook-04",
-        titulo:"Notebook Gamer Rog Strix G15 G513rm-hq084w 15.6 R7 512gb Color Eclipse gray",
-        imagen: [
-            "./img/notebooks/41.png",
-            "./img/notebooks/42.png",
-            "./img/notebooks/43.png",
-        ], 
-        categoria:{
-            nombre:"Notebooks",
-            id:"notebooks"
-        },
-        precio:4328,
-        descuento:5,
-        informacion:[
-            "Procesador AMD Ryzen 7.",
-            "Memoria RAM de 16GB.",
-            "Resolución de 2560x1440 px.",
-            "Placa de video Nvidia RTX 3060.",
-            "Conexión wifi y bluetooth.",
-            "Cuenta con 4 puertos USB y puerto HDMI.",
-            "Con teclado retroiluminado.",
-            "La duración de la batería depende del uso que se le dé al producto."
-        ],
-        envio: 100,
-        stock:35,
-        proveedor:"ATAJO AR",
-    },
-    {
-        id:"televisor-01",
-        titulo:"Tv 24' Kodak We-24tm005 Hd ",
-        imagen: [
-            "./img/televisores/11.png",
-            "./img/televisores/12.png",
-            "./img/televisores/13.png",
-        ], 
-        categoria:{
-            nombre:"Televisores",
-            id:"televisores"
-        },
-        precio:549,
-        descuento:10,
-        informacion:[
-            "Su resolución es HD.",
-            "Tecnología HDR para una calidad de imagen mejorada.",
-            "Modo de sonido: Dolby Digital.",
-            "Manejalo por comando de voz.",
-            "Sistema operativo Android.",
-            "Conectá tus dispositivos mediante sus 3 puertos HDMI y sus 2 puertos USB.",
-            "Dimensiones: 71.6cm de ancho, 43.3cm de alto, 7.6cm de profundidad.",
-            "Entretenimiento y conectividad en un mismo lugar."
-        ],
-        envio: "Envío Gratis",
-        stock:10,
-        proveedor:"OPEN FACTORY",
-    },
-    {
-        id:"televisor-02",
-        titulo:"Smart Led Fhd 40 Pulgadas Google Tv Chromecast Tda Android Kodak",
-        imagen: [
-            "./img/televisores/21.png",
-            "./img/televisores/22.png",
-            "./img/televisores/23.png",
-        ], 
-        categoria:{
-            nombre:"Televisores",
-            id:"televisores"
-        },
-        precio:599,
-        descuento:27,
-        informacion:[
-            "Su resolución es Full HD.",
-            "Tecnología HDR para una calidad de imagen mejorada.",
-            "Modo de sonido: Dolby Atmos.",
-            "Manejalo por comando de voz.",
-            "Tiene función Screen Share.",
-            "Con YouTube.",
-            "Google Assistant incorporado.",
-            "Sistema operativo Android 10.",
-            "Capacidad de almacenamiento de 8GB.",
-            "Conectá tus dispositivos mediante sus 3 puertos HDMI y sus 2 puertos USB."
-        ],
-        envio: "Envío Gratis",
-        stock:10,
-        proveedor:"MALL WEB",
-    },
-    {
-        id:"televisor-03",
-        titulo:"Smart Tv Samsung Hd 32 T4300",
-        imagen: [
-            "./img/televisores/31.png",
-            "./img/televisores/32.png",
-            "./img/televisores/33.png",
-        ], 
-        categoria:{
-            nombre:"Televisores",
-            id:"televisores"
-        },
-        precio:799,
-        descuento:27,
-        informacion:[
-            "Su resolución es HD.",
-            "Tecnología HDR para una calidad de imagen mejorada.",
-            "Modo de sonido: Dolby Digital Plus.",
-            "Manejalo por comando de voz.",
-            "Tiene función Screen Share.",
-            "Con Samsung TV Plus.",
-            "Sistema operativo Tizen.",
-            "Conectá tus dispositivos mediante sus 2 puertos HDMI y su puerto USB.",
-            "Dimensiones: 737.4mm de ancho, 438mm de alto, 74.1mm de profundidad.",
-            "Entretenimiento y conectividad en un mismo lugar."
-        ],
-        envio: 100,
-        stock:10,
-        proveedor:"MALL WEB",
-    },
-    {
-        id:"televisor-04",
-        titulo:"Tv Tcl Qled 55 4k C635 Uhd Google Tv Micro Dimming 120 Hz",
-        imagen: [
-            "./img/televisores/41.png",
-            "./img/televisores/42.png",
-            "./img/televisores/43.png",
-        ], 
-        categoria:{
-            nombre:"Televisores",
-            id:"televisores"
-        },
-        precio:1049,
-        descuento:10,
-        informacion:[
-            "Su resolución es 4K.",
-            "Tecnología HDR para una calidad de imagen mejorada.",
-            "Con Google Duo.",
-            "Sistema operativo Google TV.",
-            "Conectá tus dispositivos mediante sus 3 puertos HDMI.",
-            "Entretenimiento y conectividad en un mismo lugar."
-        ],
-        envio: "Envío Gratis",
-        stock:10,
-        proveedor:"MALL WEB",
-    }
-]
+// main.js -- Fase 5, Bloque 1: el catálogo, el filtro por categoría, el detalle
+// de producto y el buscador ahora vienen de MySQL a través de la API PHP.
+// Ya no hay ningún array de productos hardcodeado en este archivo.
+//
+// El carrito (agregarAlCarrito en adelante) todavía es el de la Fase 4
+// (localStorage) -- el Bloque 2 (carrito conectado a MySQL) todavía no fue
+// aprobado, así que no se tocó esa parte. Para que carrito.js siga
+// funcionando exactamente igual sin modificarlo, normalizarProducto()
+// convierte la forma de los datos que devuelve la API a la misma forma
+// que ya esperaba el resto del frontend de la Fase 4.
 
 const contenedorProductos = document.querySelector("#contenedor-productos");
+const sinResultados = document.querySelector("#sin-resultados");
 const tituloSeccion = document.querySelector("#titulo-seccion");
 const cantCarrito = document.querySelector("#num-en-carrito");
 
-//función para mostrar todos los productos
-function cargarProductos(productos){
-    //Vaciamos el contenedor productos,
+const LOCALE = "es-PE";
+function formatearPrecio(numero){
+    return Number(numero).toLocaleString(LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+// Todo texto que viene de la base de datos (nombres, proveedores, rutas) se escapa antes de entrar en
+// una plantilla HTML: un nombre como "<img onerror=...>" se muestra literal y nunca se ejecuta.
+function escaparHtml(texto){
+    return String(texto ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+// Teclado: Enter o Espacio activan un elemento con role="button" igual que un clic.
+function activarConTeclado(elemento, accion){
+    elemento.addEventListener("keydown", (e)=>{
+        if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            accion(e);
+        }
+    });
+}
+
+//--------------------------------------------------
+// A P I  --  helpers de acceso a la base de datos vía PHP
+//--------------------------------------------------
+const API = "api";
+
+async function pedirJson(url){
+    const respuesta = await fetch(url);
+    let datos;
+    try{
+        datos = await respuesta.json();
+    }catch{
+        throw new Error("El servidor no devolvió una respuesta válida.");
+    }
+    if(!respuesta.ok){
+        throw new Error(datos.error || `Error del servidor (${respuesta.status}).`);
+    }
+    return datos;
+}
+
+//Convierte un producto tal como lo devuelve la API a la forma que ya
+//esperaba el resto del frontend (carrito incluido) desde la Fase 4.
+function normalizarProducto(p){
+    return {
+        id: String(p.id_producto),
+        titulo: p.nombre,
+        imagen: p.imagenes && p.imagenes.length ? p.imagenes : [p.imagen_principal],
+        categoria: { id: p.categoria.slug, nombre: p.categoria.nombre },
+        precio: p.precio_final,
+        descuento: p.descuento_porcentaje || 0,
+        informacion: p.caracteristicas || [],
+        envio: p.envio_gratis ? "Envío Gratis" : p.costo_envio,
+        stock: p.stock,
+        proveedor: p.proveedor,
+    };
+}
+
+//--------------------------------------------------
+// R E N D E R  del catálogo
+//--------------------------------------------------
+function armarBloquePrecio(producto, claseFinal, claseOriginal){
+    if(producto.descuento){
+        const original = producto.precio / (1 - producto.descuento / 100);
+        return `
+            <span class="${claseOriginal}">S/. ${formatearPrecio(original)}</span>
+            <span class="${claseFinal}">S/. ${formatearPrecio(producto.precio)}</span>
+        `;
+    }
+    return `<span class="${claseFinal}">S/. ${formatearPrecio(producto.precio)}</span>`;
+}
+function armarInfoEnvio(producto){
+    if(producto.envio === "Envío Gratis"){
+        return { html: "Envío gratis", clase: "" };
+    }
+    return { html: `Envío: S/. ${formatearPrecio(producto.envio)}`, clase: "pago" };
+}
+
+function cargarProductos(listaProductos){
     contenedorProductos.innerHTML = "";
 
-    //Recorremos todo el arreglo de elementos
-    productos.forEach(producto =>{
-        //creamos un div para el elemento producto
+    listaProductos.forEach(producto =>{
         const div = document.createElement("div");
         div.classList.add("producto");
 
-        //Determino como mostrar el tipo de envio
-        let precio_envio = ""
-        if(producto.envio != "Envío Gratis"){
-            precio_envio = ""
-        }else{
-            precio_envio = producto.envio;
-        }
+        const envioInfo = armarInfoEnvio(producto);
+
         div.innerHTML = `
-            <img src="${producto.imagen[0]}" alt="" class="producto-imagen">
+            <img src="${escaparHtml(producto.imagen[0])}" alt="${escaparHtml(producto.titulo)}" class="producto-imagen">
             <div class="producto-detalles">
-                <h3 class="producto-titulo">${producto.titulo}</h3>
-                <p class="producto-precio">S/. ${(producto.precio).toLocaleString()}<span class="descuento"> ${producto.descuento}% OFF</span></p>
-                <p class="producto-tipo-envio">${precio_envio}</p>
+                <h3 class="producto-titulo">${escaparHtml(producto.titulo)}</h3>
+                ${producto.descuento ? `<span class="descuento">${Number(producto.descuento)}% OFF</span>` : ""}
+                <div class="producto-precios">
+                    ${armarBloquePrecio(producto, "producto-precio", "producto-precio-original")}
+                </div>
+                <p class="producto-tipo-envio ${envioInfo.clase}">${envioInfo.html}</p>
             </div>
         `;
 
-        //le agrego el id a dicho producto
         div.id = producto.id;
+        // Accesible con teclado: la tarjeta se enfoca con Tab y se abre con Enter/Espacio.
+        div.setAttribute("tabindex", "0");
+        div.setAttribute("role", "button");
+        div.setAttribute("aria-label", `Ver detalle de ${producto.titulo}`);
         contenedorProductos.append(div);
     })
 }
-//Llamamos a la función
-cargarProductos(productos);
 
+function mostrarResultados(listaProductos, textoVacio){
+    if(listaProductos.length === 0){
+        contenedorProductos.style.display = "none";
+        sinResultados.style.display = "block";
+        if(textoVacio){
+            const destino = document.querySelector("#texto-busqueda-vacia");
+            if(destino) destino.textContent = textoVacio;
+        }
+    }else{
+        contenedorProductos.style.display = "grid";
+        sinResultados.style.display = "none";
+        cargarProductos(listaProductos);
+    }
+}
 
+function mostrarError(mensaje){
+    contenedorProductos.style.display = "none";
+    sinResultados.style.display = "block";
+    const p = sinResultados.querySelector("p");
+    p.textContent = "No pudimos conectar con el servidor. ";
+    const fuerte = document.createElement("strong");
+    fuerte.textContent = mensaje;
+    p.append(fuerte);
+}
+function restaurarMensajeSinResultados(){
+    // Se busca el <strong> en cada llamada: antes se guardaba una referencia al cargar la página y,
+    // después de recrear el párrafo, quedaba apuntando a un nodo viejo (el término buscado no aparecía).
+    const p = sinResultados.querySelector("p");
+    p.textContent = "No encontramos productos para ";
+    const fuerte = document.createElement("strong");
+    fuerte.id = "texto-busqueda-vacia";
+    p.append(fuerte);
+}
 
-//Tomo los Botones de las categorías
-const botonesCategorias = document.querySelectorAll(".boton-categoria");
-
-//agregamos un eventlistener a cada boton de categoría
-function asignarEventListenerBotonCategoria(){
-    botonesCategorias.forEach(boton=> {
-        boton.addEventListener("click", (e)=>{
-    
-            if(e.currentTarget.id != "todos"){
-                //Filtro por id
-                //e.currentTarget.id = hace referencia al id del boton donde hice clic
-                const productosFiltrados = productos.filter(producto => producto.categoria.id === e.currentTarget.id);
-    
-                //colocamos el titulo de la sección
-                //Debemos buscar el primer producto que coincida con la categoría seleccionada, para luego tomar el nombre de la categoria
-                const productoCagegoria = productos.find(producto=> producto.categoria.id === e.currentTarget.id);
-                tituloSeccion.innerHTML = productoCagegoria.categoria.nombre;
-    
-                cargarProductos(productosFiltrados);
-            
-            }else{
-                cargarProductos(productos);
-                tituloSeccion.innerHTML = "Todos los productos";
-            }
-
-            // Una vez que se han cargado los productos le asignamos a dichos productos un EventListenerPara llamar que al hacer clic se visualice la información de dicho producto.
-            asignarEventListenerProductos();
-
-
-        })
+function marcarCategoriaActiva(idCategoria){
+    document.querySelectorAll(".nav-menu .boton-categoria").forEach(boton=>{
+        boton.classList.toggle("activo", boton.id === idCategoria);
     });
 }
-//Llamamos a la función
-asignarEventListenerBotonCategoria();
 
+//--------------------------------------------------
+// C A T Á L O G O  /  C A T E G O R Í A S  (vía API)
+//--------------------------------------------------
+async function mostrarCatalogo(slugCategoria){
+    try{
+        restaurarMensajeSinResultados();
+        const parametro = slugCategoria && slugCategoria !== "todos" ? `?categoria=${encodeURIComponent(slugCategoria)}` : "";
+        const datos = await pedirJson(`${API}/productos/listar.php${parametro}`);
+        const productos = datos.productos.map(normalizarProducto);
+        mostrarResultados(productos, "en esta categoría por ahora");
+        asignarEventListenerProductos();
+    }catch(err){
+        mostrarError(err.message);
+    }
+}
 
+// Un solo listener en el menú (delegación): sirve también para los botones que se crean después.
+document.querySelector(".nav-menu").addEventListener("click", async (e)=>{
+    const boton = e.target.closest(".boton-categoria");
+    if(!boton) return;
+    limpiarBusqueda();
+    marcarCategoriaActiva(boton.id);
+    tituloSeccion.textContent = boton.id !== "todos" ? boton.textContent : "Todos los productos";
+    await mostrarCatalogo(boton.id);
+});
 
-//tomo el elmento donde se agregara la info del producto visitado
+// Las categorías del menú vienen de MySQL: si el administrador crea, renombra o borra una categoría,
+// el menú lo refleja. Los botones conservan exactamente el mismo marcado y estilo que en el HTML original
+// (que queda como respaldo si la API no responde).
+async function cargarCategoriasMenu(){
+    try{
+        const datos = await pedirJson(`${API}/categorias/listar.php`);
+        const nav = document.querySelector(".nav-menu");
+        const actuales = [...nav.querySelectorAll(".boton-categoria:not(#todos)")].map(b => `${b.id}|${b.textContent}`).join(",");
+        const nuevas = datos.categorias.map(c => `${c.slug}|${c.nombre}`).join(",");
+        if(actuales === nuevas) return;
+        nav.querySelectorAll(".boton-categoria:not(#todos)").forEach(b => b.remove());
+        datos.categorias.forEach(c => {
+            const boton = document.createElement("button");
+            boton.className = "boton-categoria";
+            boton.id = c.slug;
+            boton.textContent = c.nombre;
+            nav.append(boton);
+        });
+    }catch{
+        // Sin conexión: quedan los botones del HTML.
+    }
+}
+
+//--------------------------------------------------
+// B U S C A D O R  (vía API -- ya no filtra un array local)
+//--------------------------------------------------
+const formBuscador = document.querySelector("#form-buscador");
+const inputBuscador = document.querySelector("#input-buscador");
+const btnLimpiarBusqueda = document.querySelector("#btn-limpiar-busqueda");
+const btnLimpiarBusquedaVacio = document.querySelector("#btn-limpiar-busqueda-vacio");
+
+async function ejecutarBusqueda(consulta){
+    const consultaLimpia = consulta.trim();
+    if(consultaLimpia === ""){
+        limpiarBusqueda();
+        return;
+    }
+    inputBuscador.value = consultaLimpia;
+    btnLimpiarBusqueda.hidden = false;
+    marcarCategoriaActiva(null);
+
+    try{
+        restaurarMensajeSinResultados();
+        const datos = await pedirJson(`${API}/productos/buscar.php?q=${encodeURIComponent(consultaLimpia)}`);
+        const productos = datos.productos.map(normalizarProducto);
+        tituloSeccion.textContent = `Resultados para "${consultaLimpia}"`;
+        mostrarResultados(productos, `"${consultaLimpia}"`);
+        asignarEventListenerProductos();
+    }catch(err){
+        mostrarError(err.message);
+    }
+}
+
+function limpiarBusqueda(){
+    inputBuscador.value = "";
+    btnLimpiarBusqueda.hidden = true;
+}
+
+if(formBuscador){
+    formBuscador.addEventListener("submit", (e)=>{
+        e.preventDefault();
+        ejecutarBusqueda(inputBuscador.value);
+    });
+    inputBuscador.addEventListener("input", ()=>{
+        btnLimpiarBusqueda.hidden = inputBuscador.value === "";
+    });
+    btnLimpiarBusqueda.addEventListener("click", ()=>{
+        limpiarBusqueda();
+        marcarCategoriaActiva("todos");
+        tituloSeccion.textContent = "Todos los productos";
+        mostrarCatalogo("todos");
+    });
+}
+if(btnLimpiarBusquedaVacio){
+    btnLimpiarBusquedaVacio.addEventListener("click", ()=>{
+        limpiarBusqueda();
+        marcarCategoriaActiva("todos");
+        tituloSeccion.textContent = "Todos los productos";
+        mostrarCatalogo("todos");
+    });
+}
+
+//--------------------------------------------------
+// D E T A L L E  de producto (vía API)
+//--------------------------------------------------
 const contenedorProductoVisitado = document.querySelector("#contenedor-producto-visitado");
+let productoEnVistaDetalle = null; // producto normalizado actualmente mostrado en el modal
+let cantidadEnVistaDetalle = 1;    // unidades elegidas en el selector del modal (1 por defecto)
 
-//Agrego a cada producto un eventListener onclikc para dirigirlo a la pàgina producto
 function asignarEventListenerProductos(){
     const divsProductos = document.querySelectorAll(".producto");
-    
-    divsProductos.forEach(producto=>{
-        producto.addEventListener("click", (e)=>{
-            contenedorProductos.style.display = "none";
-    
-            //creamos un div para el elemento producto
-            const div = document.createElement("div");
-            div.classList.add("producto-visitado");
-            div.id = e.currentTarget.id;
-    
-            const prod = productos.find((producto) => producto.id === e.currentTarget.id);
-            console.log(prod);
-    
-            div.innerHTML = `
-            <span class="cerrar" onclick="cerrar()"> <i class="bi bi-x-circle"></i> </span>
-            <div class="fotos-galeria">
-            <div class="miniaturas">
-                <img src="${prod.imagen[0]}" alt="" class="img-miniatura">
-                <img src="${prod.imagen[1]}" alt="" class="img-miniatura">
-                <img src="${prod.imagen[2]}" alt="" class="img-miniatura">
-            </div>
+
+    divsProductos.forEach(productoDiv=>{
+        const abrir = async ()=>{
+            const idProducto = productoDiv.id;
+            try{
+                const datos = await pedirJson(`${API}/productos/detalle.php?id=${encodeURIComponent(idProducto)}`);
+                mostrarDetalleProducto(normalizarProducto(datos.producto));
+            }catch(err){
+                // Sin alert(): el aviso queda en la página (y no bloquea el navegador).
+                mostrarError("No pudimos cargar el detalle de este producto: " + err.message);
+            }
+        };
+        productoDiv.addEventListener("click", abrir);
+        activarConTeclado(productoDiv, abrir);
+    })
+}
+
+function mostrarDetalleProducto(prod){
+    productoEnVistaDetalle = prod;
+    cantidadEnVistaDetalle = 1;
+
+    const stock = Number(prod.stock) || 0;
+    const sinStock = stock <= 0;
+    // Solo se muestran las fotos que el producto realmente tiene cargadas en la base de datos.
+    const imagenes = prod.imagen.filter(Boolean);
+
+    const div = document.createElement("div");
+    div.classList.add("producto-visitado");
+    div.id = prod.id;
+    div.setAttribute("role", "dialog");
+    div.setAttribute("aria-modal", "true");
+    div.setAttribute("aria-labelledby", "titulo-detalle-producto");
+
+    const miniaturas = imagenes.map((src, i) => `
+            <img src="${escaparHtml(src)}" alt="${escaparHtml(prod.titulo)} - foto ${i + 1}"
+                 class="img-miniatura${i === 0 ? " activa" : ""}" tabindex="0" role="button">`).join("");
+
+    div.innerHTML = `
+    <header class="pv-cabecera">
+        <div class="pv-marca">
+            <img src="img/logo/capi-barato-logo-horizontal.png" alt="Capi-Barato, tienda online" class="pv-logo">
+        </div>
+        <p class="pv-lema">Calidad y confianza en cada compra</p>
+        <span class="cerrar" role="button" tabindex="0" aria-label="Cerrar"> <i class="bi bi-x-lg" aria-hidden="true"></i> </span>
+    </header>
+
+    <div class="pv-cuerpo">
+        <div class="fotos-galeria">
+            <div class="miniaturas">${miniaturas}</div>
             <div class="foto-principal">
-                <img src="${prod.imagen[0]}" alt="" id="foto-principal">
+                <img src="${escaparHtml(imagenes[0] || "")}" alt="${escaparHtml(prod.titulo)}" id="foto-principal">
             </div>
         </div>
+
         <div class="info-producto">
-            <h2 class="titulo-producto">${prod.titulo}</h2>
-    
-            <p class="precio-producto">S/. ${(prod.precio).toLocaleString()} <span class="descuento">${prod.descuento}% OFF</span></p>
-    
-            <span class="txt">Lo que tenes que saber de este producto</span>
+            <h2 class="titulo-producto" id="titulo-detalle-producto">${escaparHtml(prod.titulo)}</h2>
+
+            ${prod.descuento ? `<span class="descuento">${Number(prod.descuento)}% OFF</span>` : ""}
+            <p class="precio-producto">
+                ${armarBloquePrecio(prod, "precio-actual", "precio-original")}
+            </p>
+
+            <span class="txt">Lo que tenés que saber de este producto</span>
             <ul id="listado-info">
-    
+
             </ul>
         </div>
+
         <div class="info-compra">
-            <span class="info-stock">Stock disponible</span>
-            <span class="cantidad">Cantidad: 1 unidad <span class="stock">(${prod.stock} disponibles)</span> </span>
-    
-            <button class="btn-agregar-al-carrito" id="${prod.id}">Agregar al Carrito</button>
-    
-            <span class="vendedor">Vendido por <a href="#">${prod.proveedor}</a></span>
-    
+            <span class="info-stock${sinStock ? " agotado" : ""}">${sinStock ? "Sin stock" : "Stock disponible"}</span>
+
+            <div class="pv-cantidad">
+                <span class="pv-cantidad-rotulo" id="rotulo-cantidad-detalle">Cantidad:</span>
+                <div class="selector" role="group" aria-labelledby="rotulo-cantidad-detalle">
+                    <button type="button" class="restar-cantidad" aria-label="Restar una unidad" disabled> <i class="bi bi-dash-lg" aria-hidden="true"></i> </button>
+                    <span class="cantidad" id="cantidad-detalle" role="status">1</span>
+                    <button type="button" class="sumar-cantidad" aria-label="Sumar una unidad" ${stock <= 1 ? "disabled" : ""}> <i class="bi bi-plus-lg" aria-hidden="true"></i> </button>
+                </div>
+                <span class="stock">(${stock} disponibles)</span>
+            </div>
+
+            <button class="btn-agregar-al-carrito" id="${escaparHtml(prod.id)}" ${sinStock ? "disabled" : ""}><i class="bi bi-cart-fill" aria-hidden="true"></i> Agregar al carrito</button>
+            <span class="mensaje-stock" id="mensaje-stock-detalle" role="status"></span>
+
+            <span class="vendedor">Vendido por <a href="#">${escaparHtml(prod.proveedor)}</a></span>
+
             <div class="beneficios">
                 <div class="beneficio">
                     <div class="col">
-                        <i class="bi bi-arrow-return-left"></i>
+                        <i class="bi bi-arrow-return-left" aria-hidden="true"></i>
                     </div>
                     <div class="col">
-                        <a href="#">Devolución Gratis</a> Tenes 30 días desde que lo recibis
+                        <a href="#">Devolución Gratis</a> Tenés 30 días desde que lo recibís
                     </div>
                 </div>
                 <div class="beneficio">
                     <div class="col">
-                        <i class="bi bi-shield-check"></i>
+                        <i class="bi bi-shield-check" aria-hidden="true"></i>
                     </div>
                     <div class="col">
                         <a href="#">Compra protegida</a> recibí el producto que esperabas o te devolvemos tu dinero.
@@ -479,105 +381,196 @@ function asignarEventListenerProductos(){
                 </div>
                 <div class="beneficio">
                     <div class="col">
-                        <i class="bi bi-trophy"></i>
+                        <i class="bi bi-trophy" aria-hidden="true"></i>
                     </div>
                     <div class="col">
                         <a href="#">Mercado Puntos</a> Sumá 900 puntos.
                     </div>
                 </div>
             </div>
-    
+
         </div>
-            `;
-            
-            contenedorProductoVisitado.append(div);
-            contenedorProductoVisitado.style.display = "flex";
-    
-            const listadoInfo = document.querySelector("#listado-info")
-            //agrego los items del detalle del producto
-            prod.informacion.forEach(info =>{
-                const li = document.createElement("li");
-                li.innerHTML = info;
-                listadoInfo.append(li);
-            })
-    
-            //agrego la funcionalidad los botones de miniatura
-            asignarEventListenerImgMiniatura();
+    </div>
+    `;
 
-            //asignamos el eventListener al botón Agregar al carrito
-            btnAgregar = document.querySelectorAll(".btn-agregar-al-carrito");
-            btnAgregar[0].addEventListener("click", agregarAlCarrito)
-    
-        })
-    })
-}
-
-asignarEventListenerProductos();
-
-
-//--------------------------------------------------
-//Funión para cerrar la ventana de productos
-function cerrar(){
     contenedorProductoVisitado.innerHTML = "";
-    contenedorProductos.style.display = "grid";
-    contenedorProductoVisitado.style.display = "none";
+    contenedorProductoVisitado.append(div);
+    contenedorProductoVisitado.style.display = "flex";
+    // El catálogo sigue dibujado detrás del modal: el fondo oscuro del overlay lo atenua.
+    // Solo se bloquea el desplazamiento de la página para que no se mueva por debajo.
+    document.body.classList.add("con-modal-abierto");
+
+    const listadoInfo = div.querySelector("#listado-info")
+    prod.informacion.forEach(info =>{
+        const li = document.createElement("li");
+        li.textContent = info;
+        listadoInfo.append(li);
+    })
+
+    asignarEventListenerImgMiniatura();
+    conectarSelectorCantidad(div, stock);
+
+    // Cierre: clic o teclado en la x, y también la tecla Escape. El foco va al botón de cerrar.
+    const btnCerrar = div.querySelector(".cerrar");
+    btnCerrar.addEventListener("click", cerrar);
+    activarConTeclado(btnCerrar, cerrar);
+    btnCerrar.focus();
+
+    const btnAgregar = div.querySelector(".btn-agregar-al-carrito");
+    btnAgregar.addEventListener("click", agregarAlCarrito)
 }
+
+// Selector de unidades del modal: nunca baja de 1 ni supera el stock real del producto.
+function conectarSelectorCantidad(contenedor, stock){
+    const btnRestar = contenedor.querySelector(".restar-cantidad");
+    const btnSumar = contenedor.querySelector(".sumar-cantidad");
+    const salida = contenedor.querySelector("#cantidad-detalle");
+    if(!btnRestar || !btnSumar || !salida) return;
+
+    const pintar = ()=>{
+        salida.textContent = cantidadEnVistaDetalle;
+        btnRestar.disabled = cantidadEnVistaDetalle <= 1;
+        btnSumar.disabled = cantidadEnVistaDetalle >= stock;
+    };
+    btnRestar.addEventListener("click", ()=>{
+        if(cantidadEnVistaDetalle > 1){
+            cantidadEnVistaDetalle--;
+            pintar();
+        }
+    });
+    btnSumar.addEventListener("click", ()=>{
+        if(cantidadEnVistaDetalle < stock){
+            cantidadEnVistaDetalle++;
+            pintar();
+        }
+    });
+    pintar();
+}
+
+function cerrar(){
+    const idAbierto = productoEnVistaDetalle ? productoEnVistaDetalle.id : null;
+    contenedorProductoVisitado.innerHTML = "";
+    contenedorProductoVisitado.style.display = "none";
+    document.body.classList.remove("con-modal-abierto");
+    productoEnVistaDetalle = null;
+    cantidadEnVistaDetalle = 1;
+    // Devuelve el foco a la tarjeta del producto que se había abierto.
+    const tarjeta = idAbierto ? document.getElementById(idAbierto) : null;
+    if(tarjeta && tarjeta.classList.contains("producto")) tarjeta.focus();
+}
+document.addEventListener("keydown", (e)=>{
+    if(e.key === "Escape" && productoEnVistaDetalle) cerrar();
+});
 
 function asignarEventListenerImgMiniatura(){
     const imgMiniatura = document.querySelectorAll(".img-miniatura");
     const fotoPrincipal = document.querySelector("#foto-principal")
-    
+
     imgMiniatura.forEach(mini=>{
-        mini.addEventListener("click", (e)=>{
-            console.log(e.target);
-            fotoPrincipal.src = e.target.src;
-        })
+        const elegir = ()=>{
+            fotoPrincipal.src = mini.src;
+            // Se marca cual de las miniaturas se esta viendo en grande.
+            imgMiniatura.forEach(otra => otra.classList.toggle("activa", otra === mini));
+        };
+        mini.addEventListener("click", elegir);
+        activarConTeclado(mini, elegir);
     });
 }
 
-//Vamos a necesitar una estructura para guardar los elementos que se 
-//vayan guardando en el carrito.
-let productosEnCarrito;
-//controlo si ya hay algo cargado en el localstorage cuando vuelvo de
-//carrito.html para que los productos continuen existiendo.
-const productosEnCarritoLS = JSON.parse(localStorage.getItem("productos-en-carrito"));
-if(productosEnCarritoLS){
-    productosEnCarrito = productosEnCarritoLS;
-    actualizarNumEnCarrito();
-}else{//comienzo un carrito vacío
-    productosEnCarrito = [];
+//--------------------------------------------------
+// C A R R I T O  (Bloque 2: invitado = localStorage exactamente como en la
+// Fase 4; usuario autenticado = MySQL a través de la API de carrito)
+//--------------------------------------------------
+function mostrarMensajeStock(idMensaje, texto){
+    const mensaje = document.querySelector(idMensaje);
+    if(!mensaje) return;
+    mensaje.textContent = texto;
+    clearTimeout(mensaje._timeoutId);
+    mensaje._timeoutId = setTimeout(()=>{ mensaje.textContent = ""; }, 3000);
 }
 
-function agregarAlCarrito(e){
-    //alert()
-    const idBoton = e.currentTarget.id;
-    //console.log(id);
-    const productoAgregado = productos.find(producto => producto.id=== idBoton);
-    //console.log(productoAgregado);
-
-    //controlamos si el producto ya esta en el carrito
-    if(productosEnCarrito.some(producto=>producto.id===idBoton)){
-        //el producto que se quiere ignresar ya esta en el carrito
-        // lo busco y le aumento en uno la cantidad
-        const index = productosEnCarrito.findIndex(producto=> producto.id === idBoton);
-        productosEnCarrito[index].cantidad++;
-        //console.log(productosEnCarrito);
+async function actualizarContadorCarrito(){
+    const sesion = await obtenerSesionActual();
+    let total = 0;
+    if(sesion){
+        try{
+            const datos = await apiCarritoListar();
+            total = datos.items.reduce((acc, item)=> acc + item.cantidad, 0);
+        }catch{
+            total = 0;
+        }
     }else{
-        //Al objeto producto le agrego una nueva propiedad para guardar lla cantidad de dicho producto agregados al carrito
-        productoAgregado.cantidad = 1;
-        productosEnCarrito.push(productoAgregado);
-        //console.log(productosEnCarrito);
+        const local = JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
+        total = local.reduce((acc, p)=> acc + p.cantidad, 0);
     }
-    actualizarNumEnCarrito();
+    cantCarrito.textContent = total;
+}
 
+async function agregarAlCarrito(e){
+    const idBoton = e.currentTarget.id;
+    if(!productoEnVistaDetalle || productoEnVistaDetalle.id !== idBoton) return;
+
+    // El selector del modal decide cuántas unidades se agregan. Por defecto es 1,
+    // o sea exactamente el comportamiento que había antes del selector.
+    const cantidadElegida = Math.min(Math.max(1, cantidadEnVistaDetalle), Number(productoEnVistaDetalle.stock) || 1);
+
+    const sesion = await obtenerSesionActual();
+
+    if(sesion){
+        // Usuario autenticado: MySQL es la fuente de verdad. El servidor valida
+        // stock (incluyendo lo que ya tenía en el carrito) antes de guardar.
+        try{
+            await apiCarritoAgregar(idBoton, cantidadElegida);
+            await actualizarContadorCarrito();
+            location.href = "./carrito.html";
+        }catch(err){
+            mostrarMensajeStock("#mensaje-stock-detalle", err.message);
+        }
+        return;
+    }
+
+    // Invitado: misma lógica de la Fase 4, sin cambios.
+    const productosEnCarrito = JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
+    const yaEnCarrito = productosEnCarrito.some(producto=>producto.id===idBoton);
+    const cantidadActual = yaEnCarrito
+        ? productosEnCarrito.find(producto=>producto.id===idBoton).cantidad
+        : 0;
+
+    if(cantidadActual + cantidadElegida > productoEnVistaDetalle.stock){
+        const disponibles = productoEnVistaDetalle.stock - cantidadActual;
+        mostrarMensajeStock("#mensaje-stock-detalle", disponibles > 0
+            ? `Solo podés agregar ${disponibles} unidad(es) más: ya tenés ${cantidadActual} en el carrito.`
+            : `Ya tenés en el carrito todo el stock disponible (${productoEnVistaDetalle.stock}).`);
+        return;
+    }
+
+    if(yaEnCarrito){
+        const index = productosEnCarrito.findIndex(producto=> producto.id === idBoton);
+        productosEnCarrito[index].cantidad += cantidadElegida;
+    }else{
+        const productoParaCarrito = {...productoEnVistaDetalle, cantidad: cantidadElegida};
+        productosEnCarrito.push(productoParaCarrito);
+    }
     localStorage.setItem("productos-en-carrito", JSON.stringify(productosEnCarrito));
-
-    //Lo dirijo al carrito
+    await actualizarContadorCarrito();
     location.href = "./carrito.html";
 }
 
-function actualizarNumEnCarrito(){
-    let nuevaCantEnCarrito = productosEnCarrito.reduce((acc,producto)=> acc + producto.cantidad,0)
-    //console.log(nuevaCantEnCarrito);
-    cantCarrito.innerHTML = nuevaCantEnCarrito;
+//--------------------------------------------------
+// I N I C I O
+//--------------------------------------------------
+async function iniciar(){
+    await cargarCategoriasMenu();
+    marcarCategoriaActiva("todos");
+    actualizarContadorCarrito();
+    actualizarEnlaceCuenta();
+
+    const parametrosUrl = new URLSearchParams(window.location.search);
+    const busquedaDesdeUrl = parametrosUrl.get("buscar");
+    if(busquedaDesdeUrl){
+        await ejecutarBusqueda(busquedaDesdeUrl);
+    }else{
+        await mostrarCatalogo("todos");
+    }
 }
+iniciar();

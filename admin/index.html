@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Panel de administración de Capi-Barato.">
+    <link rel="icon" href="../img/logo/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/logo/favicon-32.png">
+    <link rel="apple-touch-icon" href="../img/logo/apple-touch-icon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="admin.css">
+    <title>Panel de administración - Capi-Barato</title>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="admin-header-interno">
+            <a href="../index.html" aria-label="Ir a la tienda Capi-Barato">
+                <img src="../img/logo/capi-barato-logo.png" alt="Capi-Barato, tienda online" class="logo">
+            </a>
+            <h1>Panel de administración <small>Capi-Barato · MercadoWeb</small></h1>
+            <div class="admin-cuenta">
+                <a href="../index.html"><i class="bi bi-shop" aria-hidden="true"></i> <span class="texto-largo">Ver tienda</span></a>
+                <span class="admin-usuario" id="admin-usuario"></span>
+                <button type="button" id="btn-cerrar-sesion" class="oculto"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <noscript>
+        <p class="tarjeta" style="max-width:600px;margin:20px auto;">El panel de Capi-Barato necesita JavaScript habilitado.</p>
+    </noscript>
+
+    <div class="admin-layout oculto" id="admin-layout">
+        <nav class="admin-nav" aria-label="Secciones del panel">
+            <ul>
+                <li><a href="#/dashboard" data-vista="dashboard"><i class="bi bi-speedometer2" aria-hidden="true"></i> Dashboard</a></li>
+                <li><a href="#/pedidos" data-vista="pedidos"><i class="bi bi-receipt" aria-hidden="true"></i> Pedidos <span class="contador-nav oculto" id="nav-pendientes" title="Pedidos pendientes"></span></a></li>
+                <li><a href="#/productos" data-vista="productos"><i class="bi bi-box-seam" aria-hidden="true"></i> Productos</a></li>
+                <li><a href="#/inventario" data-vista="inventario"><i class="bi bi-clipboard-data" aria-hidden="true"></i> Inventario <span class="contador-nav oculto" id="nav-alertas" title="Productos con stock bajo"></span></a></li>
+                <li><a href="#/categorias" data-vista="categorias"><i class="bi bi-tags" aria-hidden="true"></i> Categorías</a></li>
+                <li><a href="#/usuarios" data-vista="usuarios"><i class="bi bi-people" aria-hidden="true"></i> Usuarios</a></li>
+                <li><a href="#/estadisticas" data-vista="estadisticas"><i class="bi bi-bar-chart" aria-hidden="true"></i> Estadísticas</a></li>
+            </ul>
+        </nav>
+        <main class="admin-main" id="admin-main" tabindex="-1">
+            <p class="cargando">Cargando…</p>
+        </main>
+    </div>
+
+    <section class="sin-permiso tarjeta oculto" id="sin-permiso" aria-live="polite">
+        <i class="bi bi-shield-lock" aria-hidden="true"></i>
+        <h2>No tenés permiso para entrar al panel</h2>
+        <p class="nota" style="margin:10px 0 16px;">Esta sección es solo para cuentas de administrador.</p>
+        <a class="btn" href="../index.html">Volver a la tienda</a>
+    </section>
+
+    <div class="avisos" id="avisos" aria-live="polite" aria-atomic="false"></div>
+
+    <script src="js/comun.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/estadisticas.js"></script>
+    <script src="js/pedidos.js"></script>
+    <script src="js/productos.js"></script>
+    <script src="js/inventario.js"></script>
+    <script src="js/categorias.js"></script>
+    <script src="js/usuarios.js"></script>
+    <script src="js/inicio.js"></script>
+</body>
+</html>
