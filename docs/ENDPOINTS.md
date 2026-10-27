@@ -51,7 +51,9 @@ genérico (el detalle queda solo en el log del servidor).
 Sin sesión → 401. Con sesión de cliente → 403. Todos los listados aceptan los filtros indicados.
 
 ### `/api/admin/inventario.php` (Bloque 4)
-- `GET ?filtro=todos|bajo|sin_stock&q=&categoria=` → `{umbral, resumen:{productos,activos,stock_bajo,sin_stock,unidades_totales}, productos:[{…, stock, stock_bajo, sin_stock}]}`.
+- `GET ?filtro=todos|bajo|sin_stock&q=&categoria=` → `{umbral, resumen:{productos,activos,stock_bajo,sin_stock,unidades_totales}, resumen_categorias:[…], productos:[{…, stock, stock_bajo, sin_stock}]}`.
+  `resumen_categorias` = una fila por categoría con `{categoria, slug, productos, activos, unidades, stock_bajo, sin_stock}`,
+  siempre sobre el catálogo completo (no se ve afectada por `filtro`, `q` ni `categoria`).
   Stock bajo = `stock <= STOCK_BAJO_UMBRAL` (config.php, 5 por defecto), incluye 0. Las alertas cuentan solo productos activos.
 - `POST {id_producto, operacion: "fijar"|"sumar"|"restar", cantidad}` — fijar 0…1.000.000; sumar/restar 1…1.000.000;
   nunca negativo (409); transacción con `FOR UPDATE`. Responde `{producto:{stock_anterior, stock, stock_bajo, sin_stock}}`.
@@ -84,5 +86,11 @@ Sin sesión → 401. Con sesión de cliente → 403. Todos los listados aceptan 
   (reglas pendientes de definición) → 409. Con `FOR UPDATE`: dos cambios simultáneos no se pisan.
 
 ### `/api/admin/estadisticas.php`
-- `GET ?dias=1..90` (default 14) → `{indicadores, umbral_stock_bajo, alertas_stock, pedidos_por_estado, ventas_por_categoria, productos_mas_vendidos, serie_diaria, ultimos_pedidos}`.
+- `GET ?dias=1..90&periodo=dia|semana|mes` (default `dias=14`, `periodo=dia`) → `{indicadores, umbral_stock_bajo, alertas_stock, pedidos_por_estado, ventas_por_categoria, productos_mas_vendidos, serie_diaria, grafico, ultimos_pedidos}`.
   Ventas confirmadas = pedidos `pagado`/`enviado`/`completado`. Los pendientes se informan aparte; los cancelados no suman.
+- `dias` controla solo `serie_diaria` (una entrada por día). `periodo` controla solo `grafico`, que es la serie del
+  dashboard y tiene su propia ventana: `dia` → 14 días, `semana` → 8 semanas (de lunes a domingo), `mes` → 6 meses.
+  `grafico` = `{periodo, etiqueta, desde, hasta, puntos:[{inicio, fin, pedidos, pedidos_confirmados, ventas_confirmadas}],
+  total:{…}, anterior:{desde, hasta, …}, variacion:{ventas, pedidos_confirmados}}`.
+  `anterior` es la ventana inmediatamente previa, del mismo tamaño. `variacion` es el % contra esa ventana y vale
+  `null` cuando el período anterior fue 0 (no se informa un «+100 %» inventado). Un `periodo` distinto de los tres → 400.

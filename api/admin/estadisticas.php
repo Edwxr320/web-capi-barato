@@ -2,7 +2,10 @@
 /**
  * Estadísticas y dashboard (solo rol admin) — Bloque 5. Todo se calcula en el momento desde las tablas reales.
  *
- * GET /api/admin/estadisticas.php?dias=14   (dias: 1..90, default 14, para la serie diaria)
+ * GET /api/admin/estadisticas.php?dias=14&periodo=dia
+ *   dias:    1..90, default 14 — tamaño de la serie diaria.
+ *   periodo: dia|semana|mes, default dia — serie agrupada del gráfico del dashboard, con su propia
+ *            ventana (14 días / 8 semanas / 6 meses) y la comparación con el período anterior.
  *
  * Definiciones (las mismas que se muestran en el panel):
  *  - "Ventas confirmadas": pedidos en estado pagado, enviado o completado (pago registrado por un administrador).
@@ -89,6 +92,108 @@ foreach ($stmt as $f) {
     }
 }
 
+// ---------------------------------------------------------------------------------------------------
+// Gráfico del dashboard: serie agrupada por día / semana / mes + comparación con el período anterior.
+// Es una vista APARTE de "serie_diaria" (que sigue dependiendo solo de "dias"): tiene su propia ventana.
+// Mismas reglas de negocio que los indicadores: "ventas_confirmadas" suma solo pedidos pagado/enviado/completado.
+// ---------------------------------------------------------------------------------------------------
+$periodo = isset($_GET['periodo']) && $_GET['periodo'] !== ''
+    ? campoOpcion($_GET, 'periodo', ['dia', 'semana', 'mes'])
+    : 'dia';
+
+// Cada período define: cuántos puntos, cómo agrupar en SQL y cómo avanzar un punto en PHP.
+$config = [
+    'dia'    => ['puntos' => 14, 'paso' => '1 day',   'etiqueta' => 'Últimos 14 días',
+                 'sql' => 'DATE(fecha_pedido)'],
+    'semana' => ['puntos' => 8,  'paso' => '1 week',  'etiqueta' => 'Últimas 8 semanas',
+                 'sql' => 'DATE(fecha_pedido - INTERVAL WEEKDAY(fecha_pedido) DAY)'],
+    'mes'    => ['puntos' => 6,  'paso' => '1 month', 'etiqueta' => 'Últimos 6 meses',
+                 'sql' => 'DATE(fecha_pedido - INTERVAL (DAYOFMONTH(fecha_pedido) - 1) DAY)'],
+][$periodo];
+
+// Inicio del punto que contiene a "hoy" (lunes de la semana / día 1 del mes), y de ahí hacia atrás.
+$puntoActual = match ($periodo) {
+    'semana' => $hoy->modify('-' . ((int) $hoy->format('N') - 1) . ' days'),
+    'mes'    => $hoy->modify('first day of this month'),
+    default  => $hoy,
+};
+$inicioVentana = $puntoActual->modify('-' . ($config['puntos'] - 1) . ' ' . substr($config['paso'], 2));
+$inicioAnterior = $inicioVentana->modify('-' . $config['puntos'] . ' ' . substr($config['paso'], 2));
+
+$puntos = [];
+for ($i = 0; $i < $config['puntos']; $i++) {
+    $desdePunto = $inicioVentana->modify("+$i " . substr($config['paso'], 2));
+    $finPunto = $desdePunto->modify('+' . $config['paso'])->modify('-1 day');
+    $puntos[$desdePunto->format('Y-m-d')] = [
+        'inicio' => $desdePunto->format('Y-m-d'),
+        'fin'    => $finPunto->format('Y-m-d'),
+        'pedidos' => 0, 'pedidos_confirmados' => 0, 'ventas_confirmadas' => 0.0,
+    ];
+}
+
+$stmtGrafico = $pdo->prepare(
+    'SELECT ' . $config['sql'] . ' AS punto,
+            COUNT(*) AS pedidos,
+            COALESCE(SUM(CASE WHEN estado IN ' . CONFIRMADOS . ' THEN 1 ELSE 0 END), 0) AS confirmados,
+            COALESCE(SUM(CASE WHEN estado IN ' . CONFIRMADOS . ' THEN total END), 0) AS ventas
+     FROM pedidos WHERE fecha_pedido >= :desde GROUP BY punto'
+);
+$stmtGrafico->execute(['desde' => $inicioVentana->format('Y-m-d 00:00:00')]);
+foreach ($stmtGrafico as $f) {
+    if (isset($puntos[$f['punto']])) {
+        $puntos[$f['punto']]['pedidos'] = (int) $f['pedidos'];
+        $puntos[$f['punto']]['pedidos_confirmados'] = (int) $f['confirmados'];
+        $puntos[$f['punto']]['ventas_confirmadas'] = round((float) $f['ventas'], 2);
+    }
+}
+
+// Total del período y del período anterior (misma cantidad de puntos, inmediatamente antes).
+$totalVentas = round(array_sum(array_column($puntos, 'ventas_confirmadas')), 2);
+$totalPedidos = array_sum(array_column($puntos, 'pedidos'));
+$totalConfirmados = array_sum(array_column($puntos, 'pedidos_confirmados'));
+
+$stmtAnterior = $pdo->prepare(
+    'SELECT COUNT(*) AS pedidos,
+            COALESCE(SUM(CASE WHEN estado IN ' . CONFIRMADOS . ' THEN 1 ELSE 0 END), 0) AS confirmados,
+            COALESCE(SUM(CASE WHEN estado IN ' . CONFIRMADOS . ' THEN total END), 0) AS ventas
+     FROM pedidos WHERE fecha_pedido >= :desde AND fecha_pedido < :hasta'
+);
+$stmtAnterior->execute([
+    'desde' => $inicioAnterior->format('Y-m-d 00:00:00'),
+    'hasta' => $inicioVentana->format('Y-m-d 00:00:00'),
+]);
+$ant = $stmtAnterior->fetch();
+$ventasAnterior = round((float) $ant['ventas'], 2);
+$confirmadosAnterior = (int) $ant['confirmados'];
+
+/** Variación porcentual contra el período anterior. null si el anterior fue 0: no se inventa un "+100 %". */
+$variacion = static fn(float $actual, float $previo): ?float
+    => $previo > 0 ? round(($actual - $previo) / $previo * 100, 1) : null;
+
+$grafico = [
+    'periodo'  => $periodo,
+    'etiqueta' => $config['etiqueta'],
+    'desde'    => $inicioVentana->format('Y-m-d'),
+    'hasta'    => $puntoActual->modify('+' . $config['paso'])->modify('-1 day')->format('Y-m-d'),
+    'puntos'   => array_values($puntos),
+    'total'    => [
+        'ventas_confirmadas'  => $totalVentas,
+        'pedidos'             => $totalPedidos,
+        'pedidos_confirmados' => $totalConfirmados,
+    ],
+    'anterior' => [
+        'desde' => $inicioAnterior->format('Y-m-d'),
+        'hasta' => $inicioVentana->modify('-1 day')->format('Y-m-d'),
+        'ventas_confirmadas'  => $ventasAnterior,
+        'pedidos'             => (int) $ant['pedidos'],
+        'pedidos_confirmados' => $confirmadosAnterior,
+    ],
+    'variacion' => [
+        'ventas'              => $variacion($totalVentas, $ventasAnterior),
+        'pedidos_confirmados' => $variacion((float) $totalConfirmados, (float) $confirmadosAnterior),
+    ],
+];
+
 $ultimos = array_map(fn($f) => [
     'id_pedido' => (int) $f['id_pedido'], 'fecha_pedido' => $f['fecha_pedido'], 'estado' => $f['estado'],
     'total' => (float) $f['total'], 'cliente' => $f['nombre'],
@@ -117,5 +222,6 @@ responderJson([
     'ventas_por_categoria' => $porCategoria,
     'productos_mas_vendidos' => $top,
     'serie_diaria'         => array_map(fn($dia, $v) => ['dia' => $dia] + $v, array_keys($serie), $serie),
+    'grafico'              => $grafico,
     'ultimos_pedidos'      => $ultimos,
 ]);

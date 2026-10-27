@@ -13,17 +13,24 @@
     <title>Panel de administración - Capi-Barato</title>
 </head>
 <body>
+    <!-- Franja superior negra: acciones de cuenta (boceto 4). -->
+    <div class="admin-barra-superior">
+        <div class="admin-barra-interna">
+            <a href="../index.html"><i class="bi bi-shop" aria-hidden="true"></i> <span class="texto-largo">Ver tienda</span></a>
+            <span class="admin-barra-sep" aria-hidden="true"></span>
+            <span class="admin-usuario"><i class="bi bi-person-circle" aria-hidden="true"></i> <span id="admin-usuario"></span></span>
+            <button type="button" id="btn-cerrar-sesion" class="oculto"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> <span class="texto-largo">Cerrar sesión</span></button>
+        </div>
+    </div>
+
+    <!-- Cabecera blanca: logo real de la tienda + título del panel. -->
     <header class="admin-header">
         <div class="admin-header-interno">
-            <a href="../index.html" aria-label="Ir a la tienda Capi-Barato">
-                <img src="../img/logo/capi-barato-logo.png" alt="Capi-Barato, tienda online" class="logo">
+            <a href="../index.html" class="admin-marca" aria-label="Ir a la tienda Capi-Barato">
+                <img src="../img/logo/capi-barato-logo-horizontal.png" alt="Capi-Barato, tienda online" class="logo">
             </a>
+            <span class="admin-header-sep" aria-hidden="true"></span>
             <h1>Panel de administración <small>Capi-Barato · MercadoWeb</small></h1>
-            <div class="admin-cuenta">
-                <a href="../index.html"><i class="bi bi-shop" aria-hidden="true"></i> <span class="texto-largo">Ver tienda</span></a>
-                <span class="admin-usuario" id="admin-usuario"></span>
-                <button type="button" id="btn-cerrar-sesion" class="oculto"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Cerrar sesión</button>
-            </div>
         </div>
     </header>
 
@@ -32,6 +39,7 @@
     </noscript>
 
     <div class="admin-layout oculto" id="admin-layout">
+        <!-- Única estructura de navegación del panel (no se duplica con un menú lateral). -->
         <nav class="admin-nav" aria-label="Secciones del panel">
             <ul>
                 <li><a href="#/dashboard" data-vista="dashboard"><i class="bi bi-speedometer2" aria-hidden="true"></i> Dashboard</a></li>

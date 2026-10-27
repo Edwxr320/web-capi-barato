@@ -135,6 +135,64 @@ No se cambiaron textos heredados, la paleta, el logo ni la estructura de las pá
 log real), `tests/README.md`. Regresión completa ejecutada **desde el ZIP descomprimido** en una carpeta limpia,
 siguiendo las instrucciones del README.
 
+## Rediseno del panel (boceto 4 — negro + amarillo) y mejoras del dashboard
+
+### Diseño
+Cabecera reconstruida según el boceto 4 en tres franjas: una **franja superior negra** (`#16171b`) con las acciones
+de cuenta que ya existían (Ver tienda · nombre del administrador · Cerrar sesión) e iconos en amarillo; una
+**cabecera blanca** con el logo real del proyecto (`img/logo/capi-barato-logo-horizontal.png`, el mismo de la
+tienda), un separador vertical y el título «Panel de administración» / «Capi-Barato · MercadoWeb»; y una
+**barra de navegación horizontal** con los 7 módulos, donde el activo se marca con una línea inferior amarilla.
+
+El menú lateral se **reemplazó** por esa barra (no se dejaron dos menús con los mismos enlaces, como sí muestra
+el boceto): la navegación quedó en una sola estructura, conservando los contadores de pedidos pendientes y de
+alertas de stock. Ningún módulo se eliminó. El amarillo se reserva para marca, módulo activo y acciones
+principales; el azul sigue en enlaces, indicadores y gráficos.
+
+Los 6 indicadores del dashboard pasaron a una grilla de 4 por fila (4 + 2, como el boceto), que a lo ancho
+disponible sin menú lateral evita que se partan los importes.
+
+### Funcionalidad
+- **Gráfico de ventas** en el dashboard con filtros **por día / semana / mes**, totales del período (ingresos
+  confirmados, pedidos confirmados, pedidos recibidos) y **comparación con el período anterior** del mismo
+  tamaño. Si el período anterior fue 0, la variación se informa como «sin datos» en lugar de un «+100 %»
+  inventado; si no hay pedidos en el período, se muestra un estado vacío explicando que solo se grafican ventas
+  reales. Usa la misma regla de negocio que las tarjetas (`pagado`/`enviado`/`completado`).
+- **Accesos rápidos**: Agregar producto, Gestionar pedidos, Revisar inventario y Todos los productos. Abren rutas
+  que ya existían; para el alta directa se agregó la ruta `#/productos/nuevo`.
+- **Alertas de stock**: cada alerta lleva ahora al producto afectado con el inventario ya filtrado por su nombre
+  (`#/inventario/buscar=<nombre>`), con el formulario de ajuste de existencias a la vista.
+- **Inventario por categoría**: resumen nuevo con productos, activos, unidades, stock bajo y sin stock por
+  categoría, calculado siempre sobre el catálogo completo. El umbral sigue siendo `STOCK_BAJO_UMBRAL` (5).
+
+### Base de datos
+**No se modificó el esquema ni hizo falta ninguna migración**: siguen las mismas 8 tablas. Todo lo nuevo se
+resolvió con consultas sobre `pedidos`, `detalle_pedido`, `productos` y `categorias`. En particular, el estado de
+pago **no** se separó del logístico, porque el esquema tiene un único `pedidos.estado` y la confirmación de pago
+la sigue registrando un administrador (no hay pasarela). El registro de actividad administrativa quedó pendiente
+justamente porque exigiría una tabla nueva.
+
+### Endpoints (compatibles hacia atrás)
+- `api/admin/estadisticas.php`: parámetro nuevo `periodo=dia|semana|mes` y bloque `grafico`. `dias` y
+  `serie_diaria` no cambiaron de comportamiento.
+- `api/admin/inventario.php`: bloque nuevo `resumen_categorias` en la respuesta GET.
+
+### Verificación
+Suites del proyecto: `test_navegador_admin` 47/47, `test_responsive` 260/260, `test_navegador_bloque3` 56/56,
+`test_bloque1` 25/25, `test_bloque2` 31/31, `test_bloque3` 91/91, `test_inventario` 74/74, `test_admin` 188/193.
+Las aserciones que no pasan en Windows son las mismas que fallaban **antes** de estos cambios (ver abajo). Además
+se comprobaron contra consultas SQL independientes el reparto por día/semana/mes, los totales del período, el
+período anterior, la variación y las sumas del resumen por categoría.
+
+### Nota sobre el entorno Windows (no afecta al código de la aplicación)
+En Git Bash sobre Windows, los argumentos que se pasan a un `curl.exe` nativo se transcodifican al codepage ANSI,
+así que un cuerpo JSON con tildes escrito en la línea de comandos llega con bytes inválidos y la API responde
+400. Por eso `tests/run_all.sh` ahora manda el cuerpo de su prueba de aislamiento **por stdin**
+(`printf … | curl --data-binary @-`), que es equivalente en Linux y además correcto en Windows. Las fallas que
+quedan en `test_auth` y en dos casos de `test_admin`/`imagenes` tienen ese mismo origen (payloads con tildes en la
+línea de comandos) y la de `test_concurrencia` también es del entorno: `php -S` no soporta *forking* en Windows,
+así que atiende en serie. En Linux, el entorno documentado en `docs/evidencia/entorno.txt`, no se dan.
+
 ## Pendiente (requiere tu decisión)
 B-03 (Moto G13) · "54 GB" ×2 y el nombre "…Test" · reglas de cancelación · "Recordarme", "¿Olvidaste tu contraseña?"
 y demás enlaces `#` heredados · alta de usuarios y cambio de contraseña desde el panel. Ver README §8.

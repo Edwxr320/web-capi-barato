@@ -7,7 +7,7 @@
  *        ?q=texto                       (busca en el nombre)
  *        ?categoria=slug
  *      Lista existencias de TODOS los productos (activos e inactivos) con su marca de stock bajo.
- *      Respuesta: { umbral, resumen:{...}, productos:[...] }
+ *      Respuesta: { umbral, resumen:{...}, resumen_categorias:[...], productos:[...] }
  *
  * POST /api/admin/inventario.php       (requiere X-CSRF-Token)
  *      Body: { "id_producto": 5, "operacion": "fijar"|"sumar"|"restar", "cantidad": 10 }
@@ -94,6 +94,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $r->execute(['umbral' => $umbral]);
     $res = $r->fetch();
 
+    // Resumen por categoría (siempre sobre el inventario completo, sin aplicar los filtros de la lista).
+    $porCategoria = $pdo->prepare(
+        'SELECT c.id_categoria, c.nombre, c.slug,
+                COUNT(p.id_producto) AS productos,
+                COALESCE(SUM(p.estado = "activo"), 0) AS activos,
+                COALESCE(SUM(p.stock), 0) AS unidades,
+                COALESCE(SUM(p.estado = "activo" AND p.stock <= :umbral), 0) AS stock_bajo,
+                COALESCE(SUM(p.estado = "activo" AND p.stock = 0), 0) AS sin_stock
+         FROM categorias c
+         LEFT JOIN productos p ON p.id_categoria = c.id_categoria
+         GROUP BY c.id_categoria ORDER BY c.nombre'
+    );
+    $porCategoria->execute(['umbral' => $umbral]);
+    $resumenCategorias = array_map(fn($f) => [
+        'categoria'  => $f['nombre'],
+        'slug'       => $f['slug'],
+        'productos'  => (int) $f['productos'],
+        'activos'    => (int) $f['activos'],
+        'unidades'   => (int) $f['unidades'],
+        'stock_bajo' => (int) $f['stock_bajo'],
+        'sin_stock'  => (int) $f['sin_stock'],
+    ], $porCategoria->fetchAll());
+
     responderJson([
         'umbral'    => $umbral,
         'resumen'   => [
@@ -103,6 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'sin_stock'        => (int) $res['sin_stock'],
             'unidades_totales' => (int) $res['unidades'],
         ],
+        'resumen_categorias' => $resumenCategorias,
         'productos' => $productos,
     ]);
 }

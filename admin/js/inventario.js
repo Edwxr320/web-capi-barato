@@ -5,18 +5,27 @@ registrarVista("inventario", {
     titulo: "Inventario",
     filtros: { filtro: "todos", q: "", categoria: "" },
 
+    // Parámetros de ruta: "bajo" / "sin_stock" (nivel de stock) o "buscar=<nombre>" (un producto concreto,
+    // que es como llegan las alertas del dashboard para ajustar su stock directamente).
     async mostrar(main, parametro){
-        if(parametro === "bajo" || parametro === "sin_stock") this.filtros.filtro = parametro;
+        if(parametro === "bajo" || parametro === "sin_stock"){
+            this.filtros.filtro = parametro;
+        }else if(parametro && parametro.startsWith("buscar=")){
+            this.filtros.filtro = "todos";
+            this.filtros.q = parametro.slice("buscar=".length);
+        }
         const categorias = await apiGet("admin/categorias.php").then(d => d.categorias).catch(() => []);
         const zonaResumen = el("div", { class: "kpis" });
+        const zonaCategorias = el("div", {});
         const zonaTabla = el("div", {});
         const chips = el("div", { class: "chips", role: "group", "aria-label": "Filtrar por nivel de stock" });
         const buscador = el("input", { type: "search", placeholder: "Buscar producto…", "aria-label": "Buscar producto", value: this.filtros.q });
         const selCategoria = opcionesSelect(el("select", { "aria-label": "Categoría" }),
             [["", "Todas las categorías"], ...categorias.map(c => [c.slug, c.nombre])], this.filtros.categoria);
 
-        const recargar = () => this.cargar(zonaResumen, zonaTabla, chips);
+        const recargar = () => this.cargar(zonaResumen, zonaCategorias, zonaTabla, chips);
         this.recargar = recargar;
+        this.selCategoria = selCategoria;
         for(const [valor, texto] of [["todos", "Todos"], ["bajo", "Stock bajo"], ["sin_stock", "Sin stock"]]){
             chips.append(el("button", { type: "button", class: "chip", "aria-pressed": String(this.filtros.filtro === valor), dataset: { filtro: valor },
                 onclick: () => { this.filtros.filtro = valor; recargar(); } }, texto));
@@ -28,6 +37,7 @@ registrarVista("inventario", {
             el("h2", {}, "Inventario"),
             el("p", { class: "subtitulo" }, "Existencias de todos los productos y ajustes manuales de stock."),
             zonaResumen,
+            zonaCategorias,
             el("section", { class: "tarjeta", "aria-label": "Existencias" },
                 el("div", { class: "barra" }, chips,
                     el("label", { class: "campo crece" }, "Buscar", buscador),
@@ -37,7 +47,7 @@ registrarVista("inventario", {
         await recargar();
     },
 
-    async cargar(zonaResumen, zonaTabla, chips){
+    async cargar(zonaResumen, zonaCategorias, zonaTabla, chips){
         chips.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.filtro === this.filtros.filtro)));
         let datos;
         try{
@@ -56,6 +66,8 @@ registrarVista("inventario", {
             ` Umbral de stock bajo: ${datos.umbral} unidades (se cambia en api/config/config.php, STOCK_BAJO_UMBRAL). `
             + "Las alertas cuentan solo productos activos. No se guarda un historial de movimientos: cada ajuste reemplaza el valor actual.");
 
+        this.mostrarResumenCategorias(zonaCategorias, datos.resumen_categorias || []);
+
         const columnas = [
             { titulo: "Producto" }, { titulo: "Categoría" }, { titulo: "Estado" },
             { titulo: "Stock", clase: "num" }, { titulo: "Nivel" }, { titulo: "Ajustar stock" },
@@ -70,6 +82,25 @@ registrarVista("inventario", {
         ]);
         vaciar(zonaTabla).append(crearTabla(columnas, filas,
             this.filtros.filtro === "todos" ? "No hay productos que coincidan." : "Ningún producto en este nivel de stock."));
+    },
+
+    /** Resumen del inventario por categoría (siempre sobre el catálogo completo, no sobre el filtro activo). */
+    mostrarResumenCategorias(zona, resumen){
+        const filas = resumen.map(c => [
+            { nodo: el("button", { type: "button", class: "enlace-tabla", title: `Filtrar el inventario por ${c.categoria}`,
+                onclick: () => { this.filtros.categoria = c.slug; this.selCategoria.value = c.slug; this.recargar(); } }, c.categoria) },
+            formatearEntero(c.productos),
+            formatearEntero(c.activos),
+            formatearEntero(c.unidades),
+            { nodo: c.stock_bajo ? el("span", { class: "insignia insignia-bajo" }, formatearEntero(c.stock_bajo)) : el("span", { class: "nota" }, "—") },
+            { nodo: c.sin_stock ? el("span", { class: "insignia insignia-sin-stock" }, formatearEntero(c.sin_stock)) : el("span", { class: "nota" }, "—") },
+        ]);
+        vaciar(zona).append(el("section", { class: "tarjeta" },
+            el("h3", {}, icono("bi-tags"), "Inventario por categoría"),
+            crearTabla([
+                { titulo: "Categoría" }, { titulo: "Productos", clase: "num" }, { titulo: "Activos", clase: "num" },
+                { titulo: "Unidades", clase: "num" }, { titulo: "Stock bajo" }, { titulo: "Sin stock" },
+            ], filas, "Todavía no hay categorías cargadas.")));
     },
 
     formAjuste(p){

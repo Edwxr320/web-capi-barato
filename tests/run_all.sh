@@ -71,8 +71,10 @@ verificar_aislamiento(){
     # Un registro hecho por la API tiene que aparecer en la base de pruebas: prueba de que el servidor
     # está conectado a $DB_NAME y no a otra base.
     local marca="aislamiento$(date +%s%N)@test.com"
-    curl -s -X POST "$BASE/auth/registro.php" -H "Content-Type: application/json" \
-        -d "{\"nombre\":\"Verificación\",\"email\":\"$marca\",\"password\":\"clave12345\"}" >/dev/null
+    # El cuerpo va por stdin y no como argumento: en Git Bash (Windows) los argumentos que recibe un
+    # curl.exe nativo se transcodifican al codepage ANSI y "Verificación" llegaría con bytes inválidos (400).
+    printf '{"nombre":"Verificación","email":"%s","password":"clave12345"}' "$marca" \
+        | curl -s -X POST "$BASE/auth/registro.php" -H "Content-Type: application/json" --data-binary @- >/dev/null
     [ "$($MYSQL_CLI "$DB_NAME" -s -N -e "SELECT COUNT(*) FROM usuarios WHERE email='$marca';")" == "1" ] \
         || fallar "el servidor PHP no está usando la base $DB_NAME (¿config.php con otra base y sin soporte de MERCADOWEB_DB_PRUEBAS?)"
 }

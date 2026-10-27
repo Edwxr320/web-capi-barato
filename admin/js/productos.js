@@ -6,7 +6,8 @@ registrarVista("productos", {
     titulo: "Productos",
     filtros: { q: "", categoria: "", estado: "todos" },
 
-    async mostrar(main){
+    // parametro === "nuevo" (#/productos/nuevo) abre directamente el alta, para el acceso rápido del dashboard.
+    async mostrar(main, parametro){
         this.categorias = (await apiGet("admin/categorias.php")).categorias;
         const zona = el("div", {});
         const q = el("input", { type: "search", placeholder: "Nombre o proveedor", "aria-label": "Buscar producto", value: this.filtros.q });
@@ -24,6 +25,7 @@ registrarVista("productos", {
                 zona));
         this.zona = zona;
         await this.cargar();
+        if(parametro === "nuevo") this.abrirFormulario(null);
     },
 
     async cargar(){
