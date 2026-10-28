@@ -25,7 +25,16 @@ raw = b"".join(b"\x00" + bytes([52, 131, 250]) * w for _ in range(h))
 open(ruta, "wb").write(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b""))
 PY
 }
-subir(){ curl -s -w "\n%{http_code}" -X POST "$IMG" -b "$1" -H "X-CSRF-Token: $(token_de "$1")" -F "imagen=@$2${3:+;type=$3}"; }
+# subir <jar> <archivo> [mime]
+# La ruta se pasa en formato NATIVO: en Windows (Git Bash) MSYS no traduce la ruta POSIX cuando
+# el argumento lleva el sufijo ";type=", y el curl de mingw64 no puede abrir "/d/...": fallaba
+# con "(26) Failed to open/read local data" y la prueba veia HTTP 000 sin que la peticion
+# saliera nunca. cygpath existe solo en MSYS/Git Bash; en Linux se usa la ruta tal cual.
+subir(){
+    local ruta="$2"
+    command -v cygpath >/dev/null 2>&1 && ruta="$(cygpath -w "$2")"
+    curl -s -w "\n%{http_code}" -X POST "$IMG" -b "$1" -H "X-CSRF-Token: $(token_de "$1")" -F "imagen=@$ruta${3:+;type=$3}"
+}
 
 echo "== 1) PERMISOS EN EL SERVIDOR (todas las rutas admin) =="
 H0=$(huella)

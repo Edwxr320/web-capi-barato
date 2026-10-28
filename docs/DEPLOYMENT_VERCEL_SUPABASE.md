@@ -192,11 +192,30 @@ Anotá: host (`aws-N-REGION.pooler.supabase.com`), puerto `6543`, base `postgres
 En **Project Settings → API** copiá:
 
 - **Project URL** → `SUPABASE_URL`
-- **service_role key** → `SUPABASE_SERVICE_ROLE_KEY`
+- la **clave secreta de servidor** → `SUPABASE_SERVICE_ROLE_KEY`
 
-> La *service role* da acceso total al proyecto. Va **solo** como variable de entorno del servidor.
-> Nunca en el HTML, en el JavaScript, ni en una variable con prefijo público. En este proyecto se usa
-> únicamente dentro de `api/includes/almacen_imagenes.php`, que corre en el servidor.
+Supabase tiene dos generaciones de claves y **las dos sirven**, bajo ese mismo nombre de variable:
+
+| En el panel de Supabase | Formato | Qué hace el código |
+|---|---|---|
+| **Secret key** (`sb_secret_…`), la actual | opaca, no es un JWT | la manda solo en la cabecera `apikey` |
+| **service_role key**, la heredada | JWT (`eyJ…`) | la manda en `apikey` y en `Authorization: Bearer`, como siempre |
+
+El nombre de la variable sigue siendo `SUPABASE_SERVICE_ROLE_KEY` por compatibilidad; el valor puede
+ser cualquiera de las dos. `claveSupabaseEsJwt()` en `api/includes/almacen_imagenes.php` mira la
+**forma** de la clave y arma las cabeceras en consecuencia.
+
+> **Por qué no da lo mismo.** Las claves nuevas no son JWT, y el API Gateway de Supabase intenta
+> decodificar como JWT lo que llegue en `Authorization: Bearer`: con una `sb_secret_` ahí, la
+> petición falla entera. La vía documentada para estas claves es la cabecera `apikey`. Por eso el
+> código manda `apikey` siempre y añade `Authorization` solo si la clave es un JWT.
+
+> La clave secreta da **acceso total** al proyecto. Va **solo** como variable de entorno del
+> servidor. Nunca en el HTML, en el JavaScript, ni en una variable con prefijo público. En este
+> proyecto se usa únicamente dentro de `api/includes/almacen_imagenes.php`, que corre en el servidor.
+>
+> La **publishable key** (`sb_publishable_…`) no se usa en ninguna parte: esta aplicación no habla
+> con PostgREST, va directo a PostgreSQL por PDO. No hace falta configurarla.
 
 ---
 
@@ -217,7 +236,7 @@ En **Project Settings → Environment Variables**, para *Production* y *Preview*
 | `MW_ALMACEN_SESIONES` | `bd` | Sesiones en la tabla `sesiones` |
 | `MW_ALMACEN_IMAGENES` | `supabase` | Subidas a Storage |
 | `SUPABASE_URL` | *(Project URL)* | API de Storage |
-| `SUPABASE_SERVICE_ROLE_KEY` | *(service_role key)* | Autenticación de Storage |
+| `SUPABASE_SERVICE_ROLE_KEY` | *(la clave secreta del paso 3.5)* | Autenticación de Storage |
 | `SUPABASE_BUCKET` | `productos` | Bucket de imágenes |
 
 Opcionales (si no están, se usan los mismos valores por defecto de siempre): `MW_STOCK_BAJO_UMBRAL`

@@ -47,7 +47,8 @@ define('ALMACEN_SESIONES', 'bd');
 //   'local'    -> img/productos/ del propio sitio (XAMPP)
 //   'supabase' -> Supabase Storage (obligatorio en Vercel: el disco es de solo lectura)
 // En producción: MW_ALMACEN_IMAGENES, junto con SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY y
-// SUPABASE_BUCKET. La service role key es solo de servidor: nunca se envía al navegador.
+// SUPABASE_BUCKET. Esa clave (la secreta 'sb_secret_...' actual o la service_role heredada: el
+// código acepta las dos) es solo de servidor y nunca se envía al navegador.
 define('ALMACEN_IMAGENES', 'local');
 
 // --- Valores de negocio configurables (si faltan, se usan los valores por defecto indicados) ---

@@ -15,9 +15,10 @@
  *   - modo supabase -> la URL pública completa del objeto
  * Las dos funcionan tal cual en el atributo src de las páginas de la tienda.
  *
- * SEGURIDAD: la service role key de Supabase da acceso total al proyecto. Vive únicamente en una
- * variable de entorno del servidor, se usa solo acá y JAMÁS se envía al navegador ni se registra
- * en un log. Las URLs que se aceptan al guardar un producto están restringidas al host y al bucket
+ * SEGURIDAD: la clave de servidor de Supabase (la secreta sb_secret_… actual o la service_role
+ * heredada) da acceso total al proyecto. Vive únicamente en una variable de entorno del servidor,
+ * SUPABASE_SERVICE_ROLE_KEY, se usa solo acá y JAMÁS se envía al navegador ni se registra en un
+ * log. Las URLs que se aceptan al guardar un producto están restringidas al host y al bucket
  * configurados (ver referenciaImagenValida), para que nadie pueda inyectar una URL arbitraria.
  */
 
@@ -135,13 +136,38 @@ function referenciaImagenValida($ref): bool
 }
 
 /**
+ * ¿La clave configurada es una heredada, en formato JWT (anon / service_role)?
+ *
+ * Supabase tiene dos generaciones de claves y se autentican distinto:
+ *
+ *   - HEREDADAS (service_role): son JWT, tres segmentos base64url separados por puntos. Se aceptan
+ *     tanto en "apikey" como en "Authorization: Bearer".
+ *   - NUEVAS (sb_secret_…): son opacas, NO son JWT. El API Gateway intenta decodificar como JWT lo
+ *     que llegue en "Authorization: Bearer", y con una clave opaca falla la petición entera. La vía
+ *     que documenta Supabase para estas claves es la cabecera "apikey".
+ *
+ * Por eso "apikey" se manda SIEMPRE (sirve para las dos generaciones) y "Authorization: Bearer"
+ * solo cuando la clave es un JWT: así la clave nueva funciona y la heredada sigue comportándose
+ * exactamente como antes.
+ *
+ * Se mira la FORMA de la clave, no un prefijo concreto: si Supabase cambia el prefijo de las claves
+ * opacas, esto sigue siendo correcto, porque lo que decide es si es un JWT o no.
+ */
+function claveSupabaseEsJwt(string $clave): bool
+{
+    return (bool) preg_match('#^eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$#', $clave);
+}
+
+/**
  * Petición autenticada a la API de Supabase. Devuelve [códigoHttp, cuerpo].
- * La clave viaja solo en la cabecera Authorization; nunca se escribe en la respuesta ni en un log.
+ * La clave viaja solo en las cabeceras; nunca se escribe en la respuesta ni en un log.
  */
 function peticionSupabase(string $metodo, string $url, ?string $cuerpo, array $cabeceras = []): array
 {
-    $cabeceras[] = 'Authorization: Bearer ' . SUPABASE_SERVICE_ROLE_KEY;
     $cabeceras[] = 'apikey: ' . SUPABASE_SERVICE_ROLE_KEY;
+    if (claveSupabaseEsJwt(SUPABASE_SERVICE_ROLE_KEY)) {
+        $cabeceras[] = 'Authorization: Bearer ' . SUPABASE_SERVICE_ROLE_KEY;
+    }
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [

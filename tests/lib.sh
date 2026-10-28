@@ -49,9 +49,14 @@ post(){
     local url="$1" datos="$2" jar="" a; shift 2
     local args=("$@")
     for ((a=0; a<${#args[@]}; a++)); do [ "${args[$a]}" == "-b" ] && jar="${args[$((a+1))]}"; done
-    curl -s -w "\n%{http_code}" -X POST "$url" -H "Content-Type: application/json" -H "X-CSRF-Token: $(token_de "$jar")" -d "$datos" "$@"
+    # El cuerpo va por la ENTRADA ESTANDAR (--data-binary @-), no como argumento.
+    # Motivo: en Windows (Git Bash + curl de mingw64) los argumentos de la linea de comandos se
+    # reconvierten al codepage ANSI, asi que un cuerpo con acentos llegaba como UTF-8 invalido y
+    # la API lo rechazaba, con razon, con 400 "JSON no valido": 16 fallas falsas en test_auth.
+    # Por stdin los bytes llegan intactos. En Linux el comportamiento es equivalente.
+    printf '%s' "$datos" | curl -s -w "\n%{http_code}" -X POST "$url" -H "Content-Type: application/json" -H "X-CSRF-Token: $(token_de "$jar")" --data-binary @- "$@"
 }
-post_sin_csrf(){ curl -s -w "\n%{http_code}" -X POST "$1" -H "Content-Type: application/json" -d "$2" "${@:3}"; }
+post_sin_csrf(){ printf '%s' "$2" | curl -s -w "\n%{http_code}" -X POST "$1" -H "Content-Type: application/json" --data-binary @- "${@:3}"; }
 cuerpo(){ echo "$1" | head -n -1; }
 codigo(){ echo "$1" | tail -n1; }
 sql(){ $MYSQL_CLI --default-character-set=utf8mb4 "$DB_NAME" -s -N -e "$1"; }
