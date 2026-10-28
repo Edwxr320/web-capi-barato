@@ -1,127 +1,270 @@
 # MercadoWeb — Capi-Barato
 
-Tienda en línea académica de tecnología (celulares, notebooks y televisores). **Capi-Barato** es la marca visible
-y **MercadoWeb** el nombre técnico del proyecto. Catálogo desde MySQL, cuentas de cliente y administrador,
-carrito de invitado y persistente, checkout transaccional con control de inventario, historial de compras y un
-panel administrativo completo.
+Tienda en línea de tecnología (celulares, notebooks y televisores) construida **sin frameworks ni gestores de
+paquetes**: HTML, CSS y JavaScript del lado del cliente, PHP 8 con PDO del lado del servidor. **Capi-Barato** es la
+marca visible y **MercadoWeb** el nombre técnico del proyecto.
 
-Stack: HTML5, CSS3 y JavaScript sin frameworks · PHP 8 sin frameworks · PDO + MySQL/MariaDB ·
-Bootstrap Icons 1.11.1 · fuente Figtree. Sin gestores de paquetes ni dependencias de servidor adicionales.
+Incluye catálogo dinámico, cuentas de cliente y administrador, carrito de invitado y persistente, checkout
+transaccional con control de inventario, historial de compras y un panel administrativo completo.
 
-## 1. Requisitos
+### 👉 [Ver la tienda publicada](https://web-capi-barato.vercel.app)
+
+![Inicio de Capi-Barato: cabecera, buscador, menú de categorías y catálogo](docs/screenshots/01-inicio.jpg)
+
+---
+
+## Capturas
+
+Todas son de la aplicación real en producción, tomadas como visitante no autenticado.
+
+| | |
+|---|---|
+| **Catálogo filtrado por categoría**<br>![Catálogo filtrado por la categoría Celulares](docs/screenshots/02-catalogo-celulares.jpg) | **Detalle de producto**<br>![Detalle de producto con galería, precio, características y stock](docs/screenshots/03-detalle-producto.jpg) |
+
+**Carrito de compras**
+
+![Carrito con un producto, resumen de compra, envío y total](docs/screenshots/04-carrito.jpg)
+
+**Inicio de sesión**
+
+![Pantalla de inicio de sesión de Capi-Barato](docs/screenshots/05-iniciar-sesion.jpg)
+
+**Diseño responsive**
+
+<img src="docs/screenshots/06-inicio-movil.jpg" alt="El inicio de Capi-Barato en pantalla de teléfono" width="300">
+
+---
+
+## Funcionalidades
+
+**Tienda**
+- Catálogo dinámico desde la base de datos, con menú de categorías y búsqueda por nombre, categoría o características.
+- Detalle de producto con galería de imágenes, precio con descuento, características, stock disponible y proveedor.
+- Carrito que funciona sin cuenta (`localStorage`) y se **fusiona** con el carrito del servidor al iniciar sesión.
+- Cálculo de envío por pedido: una sola vez, el mayor costo entre los productos con envío pago; gratis si todos lo son.
+- Checkout que exige sesión: el servidor recalcula precios y totales y crea el pedido dentro de una transacción,
+  descontando stock.
+- Historial "Mis Compras" con el precio realmente pagado, que no cambia si después cambia el precio del producto.
+
+**Panel administrativo**
+- Dashboard con indicadores reales (ventas, pedidos, stock).
+- Pedidos y su ciclo de estados: `pendiente → pagado → enviado → completado`.
+- Productos: alta, edición y baja con imágenes y características. Un producto con ventas se **desactiva** en lugar de
+  borrarse, para no romper el historial.
+- Inventario con alertas de stock bajo y ajustes.
+- Categorías, usuarios (activar/desactivar, cambiar rol) y estadísticas.
+
+**Roles**
+
+| Rol | Puede |
+|---|---|
+| Invitado | Ver el catálogo, buscar, ver detalles y armar un carrito en el navegador. Para comprar debe registrarse o ingresar. |
+| Cliente | Todo lo anterior + carrito guardado en la base, checkout, Mis Compras y el detalle de **sus** pedidos. |
+| Administrador | Además, el panel completo. |
+
+La autorización se verifica **en el servidor** en cada petición, releyendo rol y estado desde la base. Ocultar
+botones en la interfaz es solo cosmético.
+
+---
+
+## Tecnologías
+
+| Capa | Herramientas |
+|---|---|
+| Frontend | HTML5, CSS3 y JavaScript (ES6+) sin frameworks · Bootstrap Icons 1.11.1 · tipografía Figtree |
+| Backend | PHP 8 sin frameworks · PDO · API REST propia (23 endpoints, JSON) |
+| Base de datos | MySQL / MariaDB en local · PostgreSQL (Supabase) en producción |
+| Almacenamiento | Sistema de archivos en local · Supabase Storage en producción |
+| Infraestructura | Vercel (PHP serverless) · Supabase (PostgreSQL + Storage) |
+| Pruebas | Bash + curl · Python + Playwright |
+
+Sin `package.json` ni `composer.json`: no hay dependencias de servidor que instalar.
+
+---
+
+## Arquitectura
+
+El mismo código corre en dos entornos. No hay ramas ni archivos distintos: la diferencia se resuelve en
+`api/config/entorno.php`, que elige la configuración según lo que encuentre.
+
+```
+Navegador  ──►  index.html / carrito.html / admin/ …        (HTML + JS, sin build)
+                      │  fetch JSON
+                      ▼
+               api/*.php   ──►  api/config/entorno.php   ──►  ¿config.php local?
+                      │                                        sí → XAMPP + MySQL
+                      │                                        no → variables de entorno
+                      ▼
+            PDO  ──►  MySQL (local)  |  PostgreSQL vía Transaction Pooler (producción)
+            Imágenes ──►  img/productos/ (local)  |  Supabase Storage (producción)
+```
+
+| | Local | Producción |
+|---|---|---|
+| Servidor | XAMPP / Apache o `php -S` | Vercel, runtime PHP serverless |
+| Base de datos | MySQL / MariaDB | PostgreSQL (Supabase), Transaction Pooler |
+| Sesiones | Tabla `sesiones` en la base | Tabla `sesiones` en la base (obligatorio: el disco de Vercel es efímero) |
+| Imágenes de productos | `img/productos/` | Supabase Storage (bucket público) |
+| Configuración | `api/config/config.php` | Variables de entorno |
+
+Las diferencias de dialecto SQL (identidad autoincremental, `ILIKE` con `unaccent`, `date_trunc`, booleanos
+`'t'`/`'f'`) están resueltas en helpers dentro de `api/includes/db.php`, no esparcidas por los endpoints.
+
+---
+
+## Ejecutar en local (XAMPP + MySQL)
+
+**Requisitos**
+
 | Componente | Versión |
 |---|---|
-| PHP | 8.0 o superior (probado con **8.3.6**), con `pdo_mysql` y `mbstring` |
-| MySQL / MariaDB | MySQL 8.0.16+ o MariaDB 10.2.1+ (probado con **MariaDB 10.11.14**) |
-| Navegador | Cualquiera actual; el sitio se sirve por HTTP (no con `file://`) |
+| PHP | 8.0 o superior (probado con **8.3**), con `pdo_mysql` y `mbstring` |
+| MySQL / MariaDB | MySQL 8.0.16+ o MariaDB 10.2.1+ (probado con **MariaDB 10.11**) |
+| Navegador | Cualquiera actual; el sitio se sirve por HTTP, no con `file://` |
 
-## 2. Instalación paso a paso
-1. Copiá la carpeta `Mercadoweb` donde vayas a servirla (por ejemplo `C:\xampp\htdocs\` con XAMPP).
-2. Creá la base importando el script (crea la base `mercadoweb` con 8 tablas, 3 categorías, 12 productos y el admin):
+**Pasos**
+
+1. Cloná el repositorio donde vayas a servirlo (por ejemplo `C:\xampp\htdocs\`):
+   ```bash
+   git clone https://github.com/Edwxr320/web-capi-barato.git
+   ```
+2. Creá la base importando el script. Crea la base `mercadoweb` con **10 tablas**, 3 categorías, 12 productos y el
+   usuario administrador:
    ```bash
    mysql -u root -p < sql/mercadoweb.sql
    ```
-   (En XAMPP también: phpMyAdmin → Importar → `sql/mercadoweb.sql`.)
+   En XAMPP también sirve phpMyAdmin → Importar → `sql/mercadoweb.sql`.
 3. Configurá la conexión:
    ```bash
    cp api/config/config.example.php api/config/config.php
    ```
-   y completá `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`. `config.php` **no** está en el ZIP ni en el repositorio
-   (`.gitignore`); no subas tus credenciales.
-4. Iniciá el sitio:
-   - Servidor de PHP, desde la carpeta del proyecto: `php -S localhost:8080` → <http://localhost:8080/index.html>
-   - XAMPP / Apache: <http://localhost/Mercadoweb/index.html>
-5. Panel administrativo: <http://localhost:8080/admin/index.html>
+   y completá `DB_HOST`, `DB_NAME`, `DB_USER` y `DB_PASS`. `config.php` está en `.gitignore`: **nunca** subas tus
+   credenciales.
+4. Abrí el sitio:
+   - XAMPP / Apache → <http://localhost/Mercadoweb/index.html>
+   - Servidor embebido, desde la carpeta del proyecto → `php -S localhost:8080` y entrá a
+     <http://localhost:8080/index.html>
+5. Panel administrativo: `/admin/index.html`.
 
-Guía detallada (Windows, Linux y macOS): [`docs/INSTALACION.md`](docs/INSTALACION.md).
+Guía detallada para Windows, Linux y macOS: [`docs/INSTALACION.md`](docs/INSTALACION.md).
 
-### Configuración opcional (`api/config/config.php`)
-| Constante | Por defecto | Uso |
+**Credencial del administrador que crea el script**
+
+`sql/mercadoweb.sql` siembra `admin@capibarato.pe` con la contraseña `CapiBarato2026!`. Es una credencial de
+demostración **para tu base local**: no sirve en el sitio publicado, que tiene su propia contraseña. Cambiala apenas
+instales. Los clientes se crean desde "Creá tu cuenta".
+
+**Opciones de `api/config/config.php`**
+
+| Constante | Por defecto | Para qué sirve |
 |---|---|---|
-| `STOCK_BAJO_UMBRAL` | 5 | Un producto tiene "stock bajo" con stock ≤ este valor |
-| `LOGIN_MAX_INTENTOS` / `LOGIN_VENTANA_SEGUNDOS` | 5 / 900 | Bloqueo temporal tras fallos de login (por correo + IP) |
-| `LOGIN_DIR_INTENTOS` | carpeta temporal | Dónde se guardan esos contadores |
-| `SESSION_COOKIE_SECURE` | false | Ponelo en `true` si servís por HTTPS |
+| `STOCK_BAJO_UMBRAL` | `5` | Un producto queda marcado con "stock bajo" al llegar a este valor o menos |
+| `LOGIN_MAX_INTENTOS` / `LOGIN_VENTANA_SEGUNDOS` | `5` / `900` | Bloqueo temporal tras fallos de login (por correo + IP) |
+| `SESSION_COOKIE_SECURE` | `false` | Ponelo en `true` si servís por HTTPS |
+| `ALMACEN_SESIONES` | `'bd'` | Dónde se guardan las sesiones |
+| `ALMACEN_IMAGENES` | `'local'` | `'local'` o `'supabase'` |
+| `APP_TZ` | `'America/Lima'` | Zona horaria de la aplicación |
 
-## 3. Roles y permisos
-| Rol | Puede |
+---
+
+## Despliegue (Vercel + Supabase)
+
+El proyecto está publicado en Vercel, con PostgreSQL y Storage en Supabase. En producción no existe
+`api/config/config.php`: toda la configuración entra por **variables de entorno**.
+
+| Variable | Para qué |
 |---|---|
-| Invitado | Ver el catálogo, buscar, ver detalles y armar un carrito en el navegador (`localStorage`). Para comprar debe iniciar sesión o registrarse. |
-| Cliente | Todo lo anterior + carrito guardado en MySQL (se fusiona con el de invitado al ingresar), checkout, Mis Compras y el detalle de **sus** pedidos. |
-| Administrador | Además, el panel: dashboard, pedidos y sus estados, productos, inventario, categorías, usuarios y estadísticas. |
+| `MW_DB_DRIVER` | Motor a usar (`pgsql` en producción) |
+| `MW_DB_HOST`, `MW_DB_PORT` | Host y puerto del Transaction Pooler de Supabase |
+| `MW_DB_NAME`, `MW_DB_USER`, `MW_DB_PASS` | Credenciales de PostgreSQL |
+| `SUPABASE_URL` | URL del proyecto de Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave secreta de servidor para Storage (admite la clave `sb_secret_…` actual y las `service_role` heredadas) |
+| `SUPABASE_BUCKET` | Bucket donde se guardan las imágenes de productos |
+| `MW_ALMACEN_IMAGENES`, `MW_ALMACEN_SESIONES` | `supabase` y `bd` en producción |
+| `MW_SESSION_COOKIE_SECURE`, `MW_TZ` | Cookies solo por HTTPS y zona horaria |
+| `MW_STOCK_BAJO_UMBRAL`, `MW_LOGIN_MAX_INTENTOS`, `MW_LOGIN_VENTANA_SEGUNDOS` | Equivalentes a las constantes locales |
 
-La autorización se verifica **en el servidor** en cada petición (rol y estado releídos de MySQL). Ocultar botones
-es solo interfaz.
+Este repositorio **no contiene** valores de esas variables, ni claves, ni `config.php`, ni archivos `.env`.
 
-### Credencial de demostración
-> **Solo para uso académico — cambiala apenas instales.**
-> Administrador: `admin@capibarato.pe` / `CapiBarato2026!` (creado por `sql/mercadoweb.sql`).
-> Los clientes se crean desde "Creá tu cuenta". No hay cambio de contraseña desde el sitio todavía (ver §8); para
-> cambiar la del admin: `php -r "echo password_hash('NuevaClave', PASSWORD_DEFAULT);"` y actualizá
-> `usuarios.password_hash` con ese valor.
+El esquema de PostgreSQL y sus datos iniciales están en `supabase/migrations/` (tres migraciones acumulativas: el
+esquema, los datos de arranque y el blindaje de la API pública con Row Level Security). El procedimiento completo —
+migraciones, verificaciones y puesta en marcha — está en
+[`docs/DEPLOYMENT_VERCEL_SUPABASE.md`](docs/DEPLOYMENT_VERCEL_SUPABASE.md).
 
-## 4. Módulos y flujos
-- **Catálogo** (`index.html`): productos activos desde MySQL, menú de categorías (también desde MySQL), búsqueda por
-  nombre/categoría/características, detalle con galería. Precios en formato `es-PE` con 2 decimales.
-- **Carrito** (`carrito.html`): invitado en `localStorage`; cliente en MySQL; nunca supera el stock. Envío: una sola
-  vez por pedido, el mayor costo entre los productos con envío pago; S/. 0.00 si todos son gratis.
-- **Login / registro** (`iniciorsesion/`): vuelve al destino permitido (`?next=checkout`, `mis-compras` o `admin`; cualquier
-  otro valor lleva al inicio — sin open redirect). Al ingresar fusiona el carrito de invitado.
-- **Checkout** (`checkout.html`): requiere sesión. El servidor recalcula todo y crea el pedido en una transacción.
-- **Mis Compras** (`mis-compras.html`): historial y detalle con el precio pagado (no cambia si después cambia el precio).
-- **Panel** (`admin/`): dashboard con indicadores reales; pedidos (`pendiente → pagado → enviado → completado`);
-  productos (CRUD con imágenes y características; con ventas se desactiva en vez de borrarse); inventario (alertas y
-  ajustes); categorías; usuarios (activar/desactivar, rol); estadísticas.
+---
 
-## 5. API
-Documentación completa de cada endpoint, parámetros, validaciones y códigos: [`docs/ENDPOINTS.md`](docs/ENDPOINTS.md).
+## Pruebas
 
-## 6. Pruebas
 ```bash
-bash tests/run_all.sh      # TODAS las suites, contra la base aislada "mercadoweb_test"
+bash tests/run_all.sh          # todas las suites
+bash tests/run_all.sh bash     # solo las de bash + curl (rápido)
 ```
-Las pruebas **nunca** tocan la base `mercadoweb`: usan una base terminada en `_test`, levantan su propio servidor
-PHP y se detienen ante cualquier error de preparación. Detalle, requisitos (Playwright para las de navegador) y qué
-datos modifica cada suite: [`tests/README.md`](tests/README.md). Resultado de la última ejecución real:
-[`docs/MATRIZ-PRUEBAS.md`](docs/MATRIZ-PRUEBAS.md) y `tests/resultados/`.
 
-## 7. Seguridad aplicada
-Consultas preparadas en toda la API · contraseñas con `password_hash` · sesión HttpOnly/SameSite=Lax/modo estricto
-y regenerada al ingresar · token CSRF + verificación de `Origin` + JSON obligatorio en todo POST · límite de intentos
-de login · revalidación de rol y estado en cada petición · pedidos ajenos responden 404 · precios y totales
-calculados en el servidor · escape de todo texto en la interfaz (el panel no usa `innerHTML`) · subida de imágenes
-validada por contenido · `config.php` protegido y fuera del repositorio.
+Las pruebas **nunca** tocan la base `mercadoweb`: usan una base aislada terminada en `_test`, levantan su propio
+servidor PHP y se detienen ante cualquier error de preparación. Las suites de navegador necesitan Playwright
+(`pip install playwright` y `python3 -m playwright install chromium`); si falta, se omiten y lo avisan.
 
-## 8. Limitaciones conocidas y decisiones pendientes
-Decisiones que corresponden al responsable del proyecto (no se resolvieron por inferencia):
-1. **B-03 — precio del Moto G13.** Hoy: S/. 499.00 con 14 % = **S/. 429.14**. En la Fase 4 el S/. 499.00 se usaba de
-   otra manera. Se mantuvieron los datos actuales.
-2. **Datos dudosos del catálogo:** "Batería interna 54 GB" (Moto G13), "Memoria interna de 54 GB" (Moto E22) y el
-   nombre "Moto E22 64gb 4gb Ram Negro **Test**": sin cambios.
-3. **Cancelación de pedidos:** el estado `cancelado` existe, pero no está definido desde qué estados se puede cancelar
-   ni si se devuelve el stock. El panel y la API no permiten cancelar hasta que se defina.
-4. **Elementos heredados sin función definida:** casilla "Recordarme", enlace "¿Olvidaste tu contraseña?",
-   "Ver más productos de …", "Vendido por …", "Devolución Gratis", "Compra protegida", "Mercado Puntos — Sumá 900 puntos"
-   (enlaces `#`). Se dejaron como estaban.
-5. **Alta de usuarios y cambio de contraseña desde el panel:** no definidos.
+La última ejecución registrada (2026-10-24, contra PHP + MariaDB + Chromium) terminó con **853 aserciones aprobadas
+y 0 fallidas en 10 suites**. El detalle, aserción por aserción, está en
+[`docs/MATRIZ-PRUEBAS.md`](docs/MATRIZ-PRUEBAS.md); los requisitos y qué datos modifica cada suite, en
+[`tests/README.md`](tests/README.md).
 
-Limitaciones técnicas:
-- Sin pasarela de pagos (por diseño): `pagado` lo registra un administrador.
-- El inventario no guarda historial de movimientos (no se agregó tabla, por decisión del proyecto).
-- El límite de intentos de login es por correo + IP y se guarda en archivos temporales del servidor; no frena a quien
-  rote muchas IP.
-- Las imágenes subidas que dejan de usarse no se borran del disco automáticamente.
-- Bootstrap Icons y Figtree se cargan desde CDN: sin Internet el sitio funciona, pero sin iconos ni esa fuente.
-- `php -S` sirve para desarrollo y pruebas; para uso real conviene Apache/Nginx con PHP-FPM y HTTPS
-  (`SESSION_COOKIE_SECURE = true`).
+---
 
-## 9. Documentación
+## Seguridad aplicada
+
+- Consultas preparadas con PDO en toda la API.
+- Contraseñas con `password_hash` / `password_verify` (bcrypt).
+- Sesión HttpOnly, `SameSite=Lax`, modo estricto, regenerada al ingresar y guardada en la base.
+- Token CSRF, verificación de `Origin` y cuerpo JSON obligatorio en todo POST.
+- Límite de intentos de login por correo + IP, contabilizado en la base de datos.
+- Rol y estado del usuario revalidados en cada petición; los pedidos ajenos responden 404.
+- Precios, totales y envío calculados en el servidor, nunca tomados del cliente.
+- Todo texto escapado en la interfaz; el panel no usa `innerHTML`.
+- Subida de imágenes validada por contenido real, no por extensión.
+- En PostgreSQL, Row Level Security activa en las 10 tablas y permisos revocados a los roles públicos, para que la
+  API REST automática de Supabase no exponga datos.
+- `config.php`, claves y archivos `.env` quedan fuera del repositorio.
+
+---
+
+## Estado del proyecto
+
+El sitio está publicado y en funcionamiento. Verificado en producción: el catálogo y el detalle se sirven desde
+PostgreSQL, las sesiones se guardan en la base, el inicio de sesión funciona y la subida de imágenes a Supabase
+Storage completa el ciclo de alta, lectura pública y borrado.
+
+Es un proyecto **académico y de portafolio**: no tiene pasarela de pagos, y el estado `pagado` lo registra un
+administrador desde el panel.
+
+**Limitaciones conocidas**
+
+- Sin pasarela de pagos (decisión de diseño).
+- El inventario no guarda historial de movimientos.
+- El estado `cancelado` existe en el modelo, pero el panel todavía no permite cancelar: falta definir desde qué
+  estados se puede y si se devuelve el stock.
+- No hay cambio de contraseña ni alta de usuarios desde el panel.
+- Las imágenes que dejan de usarse no se borran automáticamente del almacenamiento.
+- Quedan elementos heredados de la maqueta sin función real ("Recordarme", "¿Olvidaste tu contraseña?",
+  "Mercado Puntos", "Devolución Gratis").
+- Bootstrap Icons y Figtree se cargan desde CDN: sin Internet el sitio funciona, pero sin iconos ni esa tipografía.
+
+El detalle de estas decisiones, con su historia, está en [`docs/CHANGELOG.md`](docs/CHANGELOG.md).
+
+---
+
+## Documentación
+
 | Archivo | Contenido |
 |---|---|
-| `docs/CHANGELOG.md` | Qué se hizo en cada bloque, defectos encontrados y corregidos, y qué falta |
-| `docs/ARCHIVOS.md` | Inventario de archivos creados y modificados |
-| `docs/ENDPOINTS.md` | Referencia de la API |
-| `docs/INSTALACION.md` | Instalación detallada |
-| `docs/MATRIZ-PRUEBAS.md` | Matriz de pruebas con el resultado real de cada aserción |
-| `docs/evidencia/` | Salidas de la línea base y de las pruebas nuevas contra el código original |
-| `tests/resultados/` | Log de la última ejecución, log del servidor y capturas de pantalla |
+| [`docs/INSTALACION.md`](docs/INSTALACION.md) | Instalación detallada en Windows, Linux y macOS |
+| [`docs/DEPLOYMENT_VERCEL_SUPABASE.md`](docs/DEPLOYMENT_VERCEL_SUPABASE.md) | Despliegue en Vercel + Supabase, migraciones y verificaciones |
+| [`docs/ENDPOINTS.md`](docs/ENDPOINTS.md) | Referencia de la API: parámetros, validaciones y códigos |
+| [`docs/MATRIZ-PRUEBAS.md`](docs/MATRIZ-PRUEBAS.md) | Matriz de pruebas con el resultado real de cada aserción |
+| [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | Qué se hizo en cada bloque, defectos encontrados y corregidos |
+| [`docs/ARCHIVOS.md`](docs/ARCHIVOS.md) | Inventario de archivos del proyecto |
+| [`tests/README.md`](tests/README.md) | Cómo correr las pruebas y qué datos toca cada suite |
+
+---
+
+Desarrollado por [Edwxr320](https://github.com/Edwxr320).
