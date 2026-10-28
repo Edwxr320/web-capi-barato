@@ -15,7 +15,9 @@ transaccional con control de inventario, historial de compras y un panel adminis
 
 ## Capturas
 
-Todas son de la aplicación real en producción, tomadas como visitante no autenticado.
+### Tienda
+
+De la aplicación real en producción, tomadas como visitante no autenticado.
 
 | | |
 |---|---|
@@ -32,6 +34,25 @@ Todas son de la aplicación real en producción, tomadas como visitante no auten
 **Diseño responsive**
 
 <img src="docs/screenshots/06-inicio-movil.jpg" alt="El inicio de Capi-Barato en pantalla de teléfono" width="300">
+
+### Panel administrativo
+
+Tomadas sobre una instalación local con los datos de ejemplo del repositorio, para no exponer información de
+clientes reales. Por eso los indicadores de ventas aparecen en cero: el panel solo muestra pedidos reales.
+
+**Dashboard**
+
+Indicadores del negocio (ventas confirmadas, pedidos pendientes, ticket promedio, clientes activos, productos y
+alertas de stock), accesos rápidos y evolución de ventas por día, semana o mes.
+
+![Dashboard del panel administrativo con sus indicadores, accesos rápidos y gráfico de ventas](docs/screenshots/07-panel-admin.jpg)
+
+**Gestión de productos**
+
+Listado con buscador y filtros por categoría y estado, precio original y final con el descuento aplicado, stock,
+unidades vendidas y las acciones de edición, desactivación y borrado.
+
+![Gestión de productos del panel: tabla con buscador, filtros, precios, stock y acciones](docs/screenshots/08-admin-productos.jpg)
 
 ---
 
