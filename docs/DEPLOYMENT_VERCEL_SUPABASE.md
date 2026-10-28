@@ -274,6 +274,7 @@ El proyecto ya incluye `api/diagnostico.php`, pensado para no filtrar nada:
 - Devuelve **solo true/false**: ni versiones de PHP, ni rutas, ni host, ni usuario, ni credenciales,
   ni mensajes de error del motor. Quien acierte la URL sin el token no aprende nada.
 - No escribe en la base: la prueba de conexión es un `SELECT 1`.
+- La prueba de Storage es **opt-in** (`&storage=1`) y se limpia sola: ver 5.2.
 
 Pasos:
 
@@ -292,15 +293,59 @@ Pasos:
   "imagenes_en_supabase": true,
   "storage_configurado": true,
   "base_responde": true,
-  "tablas_completas": true
+  "tablas_completas": true,
+  "storage_prueba": null
 }
 ```
 
-4. Cuando termines, **borrá `MW_DIAGNOSTICO_TOKEN` en Vercel**. El endpoint vuelve a responder 404
-   sin tocar el código ni volver a desplegar.
+4. Cuando termines, **borrá `MW_DIAGNOSTICO_TOKEN` en Vercel y volvé a desplegar**. En Vercel las
+   variables de entorno se fijan por despliegue: borrarla en el panel **no** apaga el endpoint en el
+   despliegue que ya está vivo. Mientras no redespliegues, sigue respondiendo con el token viejo.
 
 Si `pdo_pgsql` diera `false`, la alternativa es desplegar con contenedor (`Dockerfile.vercel` y
 `"runtime": "container"`), donde vos elegís las extensiones. El resto del código no cambia.
+
+### 5.2 Comprobar Supabase Storage de verdad
+
+`storage_configurado` solo dice que `SUPABASE_URL` y la clave no están vacías: **no prueba que la
+autenticación funcione**. Con las claves nuevas (`sb_secret_…`, opacas en lugar de JWT) esa
+distinción importa, porque lo que puede fallar es la cabecera con la que viaja la clave (ver 3.5).
+
+Agregá `&storage=1`:
+
+```
+https://<tu-dominio>/api/diagnostico.php?token=<ese-valor>&storage=1
+```
+
+Sube un PNG de 1×1 con nombre al azar, lo lee por la URL pública **sin ninguna cabecera de
+autenticación** (como lo haría el navegador de un cliente), comprueba que los bytes son idénticos,
+lo borra y confirma que quedó borrado. Usa el mismo `peticionSupabase()` que el panel, así que
+prueba el código real, no una copia. Tiene que responder:
+
+```json
+"storage_prueba": {
+  "clave_es_jwt": false,
+  "subida_http": 200,
+  "subida_ok": true,
+  "lectura_publica_http": 200,
+  "lectura_publica_ok": true,
+  "borrado_http": 200,
+  "borrado_ok": true,
+  "quedo_limpio": true
+}
+```
+
+`clave_es_jwt: false` es lo correcto con una clave `sb_secret_`; con la `service_role` heredada sería
+`true`. Cómo leer un fallo, sin que haga falta ver ningún secreto:
+
+| Síntoma | Qué significa |
+|---|---|
+| `storage_prueba: null` | no pediste `&storage=1`, o `MW_ALMACEN_IMAGENES` no es `supabase`, o falta `SUPABASE_URL` / la clave |
+| `subida_http` 401 o 403 | la clave no autentica: valor incorrecto, o la cabecera no es la que Storage espera |
+| `subida_http` 404 | el bucket de `SUPABASE_BUCKET` no existe |
+| `subida_http` 413 | el objeto excede el límite del bucket |
+| `lectura_publica_ok: false` con subida `ok` | el bucket **no** es público: marcalo como *Public bucket* (3.3) |
+| `quedo_limpio: false` | quedó el objeto de prueba; borralo a mano desde Storage |
 
 ## 6. Verificación después de desplegar
 
