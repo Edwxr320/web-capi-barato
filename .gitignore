@@ -27,3 +27,8 @@ desktop.ini
 __pycache__/
 tests/__pycache__/
 *.pyc
+
+# Permisos personales de Claude Code para esta maquina. No se versiona:
+# este repositorio es publico y un permiso commiteado quedaria preaprobado
+# para cualquiera que lo clone.
+.claude/settings.local.json

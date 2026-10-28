@@ -70,6 +70,22 @@ if ($hayConfigLocal) {
 }
 
 // --------------------------------------------------------------------------------------------
+// 1.b) En producción, los avisos de PHP NO se imprimen en la respuesta.
+//
+// Se descubrió desplegando: PHP 8.5 marcó curl_close() como obsoleta y el runtime de Vercel trae
+// display_errors activado, así que el aviso salía ANTES del JSON. Dos consecuencias, las dos malas:
+// el JSON dejaba de ser parseable para el panel, y el aviso incluía la ruta del archivo en el
+// servidor. Los errores se siguen registrando (log_errors), y la aplicación ya responde siempre
+// con un mensaje genérico en JSON, así que no se pierde nada de diagnóstico.
+//
+// En local (donde existe config.php) no se toca nada: ahí ver los avisos es justamente lo útil.
+// --------------------------------------------------------------------------------------------
+if (!$hayConfigLocal) {
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+}
+
+// --------------------------------------------------------------------------------------------
 // 2) Producción: todo desde el entorno.
 // --------------------------------------------------------------------------------------------
 $url = conexionDesdeUrl();

@@ -146,7 +146,6 @@ function pruebaStorage(): array
         ]);
         $cuerpo = curl_exec($ch);
         $r['lectura_publica_http'] = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
         // Tiene que devolver EXACTAMENTE los bytes subidos.
         $r['lectura_publica_ok'] = $r['lectura_publica_http'] === 200 && $cuerpo === $png;
 
@@ -164,7 +163,6 @@ function pruebaStorage(): array
         ]);
         curl_exec($ch);
         $r['quedo_limpio'] = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE) >= 400;
-        curl_close($ch);
     }
 
     return $r;

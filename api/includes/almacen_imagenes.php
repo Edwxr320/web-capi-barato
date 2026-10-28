@@ -182,6 +182,5 @@ function peticionSupabase(string $metodo, string $url, ?string $cuerpo, array $c
     }
     $respuesta = curl_exec($ch);
     $codigo = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
     return [$codigo, $respuesta === false ? '' : (string) $respuesta];
 }
