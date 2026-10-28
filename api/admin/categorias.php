@@ -24,7 +24,7 @@ function listarCategorias(PDO $pdo): array
 {
     $filas = $pdo->query(
         'SELECT c.id_categoria, c.nombre, c.slug, c.fecha_creacion,
-                COUNT(p.id_producto) AS productos, COALESCE(SUM(p.estado = "activo"), 0) AS activos
+                COUNT(p.id_producto) AS productos, COALESCE(SUM(CASE WHEN p.estado = \'activo\' THEN 1 ELSE 0 END), 0) AS activos
          FROM categorias c LEFT JOIN productos p ON p.id_categoria = c.id_categoria
          GROUP BY c.id_categoria ORDER BY c.nombre'
     )->fetchAll();
@@ -81,7 +81,7 @@ if ($accion === 'crear') {
         }
         throw $e;
     }
-    responderJson(['mensaje' => "Categoría \"$nombre\" creada.", 'id_categoria' => (int) $pdo->lastInsertId(), 'categorias' => listarCategorias($pdo)], 201);
+    responderJson(['mensaje' => "Categoría \"$nombre\" creada.", 'id_categoria' => ultimoId($pdo, 'categorias', 'id_categoria'), 'categorias' => listarCategorias($pdo)], 201);
 }
 
 $id = campoIdRequerido($d, 'id_categoria');

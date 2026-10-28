@@ -85,7 +85,7 @@ try {
             'nombre'       => $item['nombre'],
             'cantidad'     => (int) $item['cantidad'],
             'precio_final' => $precioFinal,
-            'envio_gratis' => (bool) $item['envio_gratis'],
+            'envio_gratis' => aBooleano($item['envio_gratis']),
             'costo_envio'  => $item['costo_envio'] !== null ? (float) $item['costo_envio'] : null,
         ];
     }
@@ -94,7 +94,7 @@ try {
     // 4) Pedido.
     $stmtPedido = $pdo->prepare(
         'INSERT INTO pedidos (id_usuario, estado, subtotal, costo_envio, total, direccion_envio)
-         VALUES (:u, "pendiente", :subtotal, :envio, :total, :direccion)'
+         VALUES (:u, \'pendiente\', :subtotal, :envio, :total, :direccion)'
     );
     $stmtPedido->execute([
         'u'         => $usuario['id_usuario'],
@@ -103,7 +103,7 @@ try {
         'total'     => $resumen['total'],
         'direccion' => $direccion,
     ]);
-    $idPedido = (int) $pdo->lastInsertId();
+    $idPedido = ultimoId($pdo, 'pedidos', 'id_pedido');
 
     // 5) Detalle (con el precio ya congelado) + descuento de stock, línea por línea.
     $stmtDetalle = $pdo->prepare(

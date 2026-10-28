@@ -34,16 +34,16 @@ $k = $pdo->query(
         (SELECT COUNT(*) FROM pedidos) AS pedidos_total,
         (SELECT COUNT(*) FROM pedidos WHERE estado IN ' . CONFIRMADOS . ') AS pedidos_confirmados,
         (SELECT COALESCE(SUM(total),0) FROM pedidos WHERE estado IN ' . CONFIRMADOS . ') AS ventas_confirmadas,
-        (SELECT COUNT(*) FROM pedidos WHERE estado = "pendiente") AS pedidos_pendientes,
-        (SELECT COALESCE(SUM(total),0) FROM pedidos WHERE estado = "pendiente") AS monto_pendiente,
-        (SELECT COUNT(*) FROM usuarios WHERE rol = "cliente") AS clientes,
-        (SELECT COUNT(*) FROM usuarios WHERE rol = "cliente" AND estado = "activo") AS clientes_activos,
+        (SELECT COUNT(*) FROM pedidos WHERE estado = \'pendiente\') AS pedidos_pendientes,
+        (SELECT COALESCE(SUM(total),0) FROM pedidos WHERE estado = \'pendiente\') AS monto_pendiente,
+        (SELECT COUNT(*) FROM usuarios WHERE rol = \'cliente\') AS clientes,
+        (SELECT COUNT(*) FROM usuarios WHERE rol = \'cliente\' AND estado = \'activo\') AS clientes_activos,
         (SELECT COUNT(*) FROM productos) AS productos,
-        (SELECT COUNT(*) FROM productos WHERE estado = "activo") AS productos_activos,
+        (SELECT COUNT(*) FROM productos WHERE estado = \'activo\') AS productos_activos,
         (SELECT COUNT(*) FROM categorias) AS categorias'
 )->fetch();
 $alertas = $pdo->prepare(
-    'SELECT p.id_producto, p.nombre, p.stock FROM productos p WHERE p.estado = "activo" AND p.stock <= :u ORDER BY p.stock, p.id_producto'
+    'SELECT p.id_producto, p.nombre, p.stock FROM productos p WHERE p.estado = \'activo\' AND p.stock <= :u ORDER BY p.stock, p.id_producto'
 );
 $alertas->execute(['u' => $umbral]);
 $listaAlertas = array_map(fn($f) => ['id_producto' => (int) $f['id_producto'], 'nombre' => $f['nombre'], 'stock' => (int) $f['stock']], $alertas->fetchAll());
@@ -76,14 +76,14 @@ $top = array_map(fn($f) => [
 // Serie diaria de los últimos N días (incluye días sin ventas, con 0).
 $serie = [];
 // "Hoy" según MySQL (mismo reloj que fecha_pedido), para no desfasar días si PHP y MySQL usan otra zona horaria.
-$hoy = new DateTimeImmutable($pdo->query('SELECT CURDATE()')->fetchColumn());
+$hoy = new DateTimeImmutable($pdo->query('SELECT CURRENT_DATE')->fetchColumn());
 for ($i = $dias - 1; $i >= 0; $i--) {
     $serie[$hoy->modify("-$i days")->format('Y-m-d')] = ['pedidos' => 0, 'ventas_confirmadas' => 0.0];
 }
 $stmt = $pdo->prepare(
-    'SELECT DATE(fecha_pedido) AS dia, COUNT(*) AS pedidos,
+    'SELECT ' . sqlInicioDe('day', 'fecha_pedido') . ' AS dia, COUNT(*) AS pedidos,
             COALESCE(SUM(CASE WHEN estado IN ' . CONFIRMADOS . ' THEN total END), 0) AS confirmadas
-     FROM pedidos WHERE fecha_pedido >= :desde GROUP BY DATE(fecha_pedido)'
+     FROM pedidos WHERE fecha_pedido >= :desde GROUP BY ' . sqlInicioDe('day', 'fecha_pedido')
 );
 $stmt->execute(['desde' => $hoy->modify('-' . ($dias - 1) . ' days')->format('Y-m-d 00:00:00')]);
 foreach ($stmt as $f) {
@@ -104,11 +104,11 @@ $periodo = isset($_GET['periodo']) && $_GET['periodo'] !== ''
 // Cada período define: cuántos puntos, cómo agrupar en SQL y cómo avanzar un punto en PHP.
 $config = [
     'dia'    => ['puntos' => 14, 'paso' => '1 day',   'etiqueta' => 'Últimos 14 días',
-                 'sql' => 'DATE(fecha_pedido)'],
+                 'sql' => sqlInicioDe('day', 'fecha_pedido')],
     'semana' => ['puntos' => 8,  'paso' => '1 week',  'etiqueta' => 'Últimas 8 semanas',
-                 'sql' => 'DATE(fecha_pedido - INTERVAL WEEKDAY(fecha_pedido) DAY)'],
+                 'sql' => sqlInicioDe('week', 'fecha_pedido')],
     'mes'    => ['puntos' => 6,  'paso' => '1 month', 'etiqueta' => 'Últimos 6 meses',
-                 'sql' => 'DATE(fecha_pedido - INTERVAL (DAYOFMONTH(fecha_pedido) - 1) DAY)'],
+                 'sql' => sqlInicioDe('month', 'fecha_pedido')],
 ][$periodo];
 
 // Inicio del punto que contiene a "hoy" (lunes de la semana / día 1 del mes), y de ahí hacia atrás.
@@ -201,7 +201,7 @@ $ultimos = array_map(fn($f) => [
 
 $confirmados = (int) $k['pedidos_confirmados'];
 responderJson([
-    'generado'   => $pdo->query('SELECT NOW()')->fetchColumn(),
+    'generado'   => $pdo->query(sqlAhoraTexto())->fetchColumn(),
     'indicadores' => [
         'ventas_confirmadas'  => round((float) $k['ventas_confirmadas'], 2),
         'pedidos_confirmados' => $confirmados,

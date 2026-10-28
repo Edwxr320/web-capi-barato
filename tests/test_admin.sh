@@ -276,7 +276,7 @@ check "dias=91" 400 "$(curl -s -b "$JAR_A" -o /dev/null -w '%{http_code}' "$EST?
 
 echo "== 13) INTEGRIDAD FINAL =="
 igual "Ningún stock negativo" 0 "$(sql 'SELECT COUNT(*) FROM productos WHERE stock<0;')"
-igual "Siguen las 3 categorías originales y las 8 tablas" "3|8" "$(sql "SELECT CONCAT((SELECT COUNT(*) FROM categorias WHERE slug IN ('celulares','notebooks','televisores')),'|',(SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='$DB_NAME'));")"
+igual "Siguen las 3 categorías originales y las 10 tablas" "3|10" "$(sql "SELECT CONCAT((SELECT COUNT(*) FROM categorias WHERE slug IN ('celulares','notebooks','televisores')),'|',(SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='$DB_NAME'));")"
 igual "Hay al menos un administrador activo" 1 "$(sql "SELECT COUNT(*)>0 FROM usuarios WHERE rol='admin' AND estado='activo';")"
 find "$RAIZ/img/productos" -type f ! -name '.htaccess' -delete
 rm -rf "$TMPD" "$JAR_A" "$JAR_C" "$JAR_D"

@@ -14,3 +14,16 @@ desktop.ini
 *.bak
 *.tmp
 *~
+
+# Vinculo local con el proyecto de Vercel (lo crea 'vercel link').
+# Es de esta maquina: no se versiona.
+.vercel/
+
+.vercel
+.env*
+
+# Cache de bytecode de Python. Lo genera el interprete al correr tests/test_responsive.py
+# y se regenera solo; no es codigo fuente.
+__pycache__/
+tests/__pycache__/
+*.pyc

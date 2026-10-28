@@ -47,7 +47,7 @@ $items = array_map(function ($fila) {
             'descuento_porcentaje' => $fila['descuento_porcentaje'] !== null ? (int) $fila['descuento_porcentaje'] : null,
             'precio_final'         => $precioFinal,
             'stock'                => (int) $fila['stock'],
-            'envio_gratis'         => (bool) $fila['envio_gratis'],
+            'envio_gratis'         => aBooleano($fila['envio_gratis']),
             'costo_envio'          => $fila['costo_envio'] !== null ? (float) $fila['costo_envio'] : null,
             'proveedor'            => $fila['proveedor'],
             'categoria'            => ['nombre' => $fila['categoria_nombre'], 'slug' => $fila['categoria_slug']],

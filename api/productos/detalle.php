@@ -25,7 +25,7 @@ $stmt = $pdo->prepare(
             c.id_categoria, c.nombre AS categoria_nombre, c.slug AS categoria_slug
      FROM productos p
      JOIN categorias c ON p.id_categoria = c.id_categoria
-     WHERE p.id_producto = :id AND p.estado = "activo"'
+     WHERE p.id_producto = :id AND p.estado = \'activo\''
 );
 $stmt->execute(['id' => $idProducto]);
 $fila = $stmt->fetch();
@@ -49,7 +49,7 @@ $producto = [
     'descuento_porcentaje' => $fila['descuento_porcentaje'] !== null ? (int) $fila['descuento_porcentaje'] : null,
     'precio_final'         => calcularPrecioFinal((float) $fila['precio_original'], $fila['descuento_porcentaje']),
     'stock'                => (int) $fila['stock'],
-    'envio_gratis'         => (bool) $fila['envio_gratis'],
+    'envio_gratis'         => aBooleano($fila['envio_gratis']),
     'costo_envio'          => $fila['costo_envio'] !== null ? (float) $fila['costo_envio'] : null,
     'proveedor'            => $fila['proveedor'],
     'categoria'            => [

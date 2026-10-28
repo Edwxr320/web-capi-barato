@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $where[] = 'p.id_pedido = :idq';
             $par['idq'] = (int) $m[1];
         } else {
-            $where[] = '(u.nombre LIKE :q OR u.email LIKE :q2)';
+            $where[] = '(' . sqlContiene('u.nombre', 'q') . ' OR ' . sqlContiene('u.email', 'q2') . ')';
             $par['q'] = '%' . $q . '%';
             $par['q2'] = '%' . $q . '%';
         }

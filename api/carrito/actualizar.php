@@ -28,7 +28,7 @@ if ($cantidadNueva === null) {
 
 $pdo = obtenerConexion();
 
-$stmtProd = $pdo->prepare('SELECT stock FROM productos WHERE id_producto = :id AND estado = "activo"');
+$stmtProd = $pdo->prepare('SELECT stock FROM productos WHERE id_producto = :id AND estado = \'activo\'');
 $stmtProd->execute(['id' => $idProducto]);
 $producto = $stmtProd->fetch();
 if (!$producto) {

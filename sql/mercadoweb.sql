@@ -156,6 +156,36 @@ CREATE TABLE detalle_pedido (
     INDEX idx_detalle_pedido (id_pedido)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ---------------------------------------------------------------------
+-- sesiones  (sesiones de PHP guardadas en la base -- ver api/includes/sesion_bd.php)
+--
+-- El manejador de archivos de PHP guarda la sesion en el disco del servidor. En un entorno
+-- serverless (Vercel) cada peticion puede atenderla otra instancia, con su propio disco temporal
+-- que ademas se borra: la sesion se perderia al azar y, como el token CSRF vive en la sesion,
+-- fallaria toda operacion de escritura. Con esta tabla la sesion es compartida y duradera.
+-- Se usa el mismo manejador en XAMPP, para que lo que se prueba en local sea lo que corre publicado.
+-- ---------------------------------------------------------------------
+CREATE TABLE sesiones (
+    id                VARCHAR(128) PRIMARY KEY,
+    datos             MEDIUMTEXT   NOT NULL,
+    fecha_expiracion  DATETIME     NOT NULL,
+    INDEX idx_sesiones_expiracion (fecha_expiracion)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- intentos_login  (contador anti fuerza bruta -- ver api/includes/limite_intentos.php)
+--
+-- Antes vivia en archivos del directorio temporal. En serverless cada instancia tiene el suyo y se
+-- borra, asi que el limite no frenaba nada. "clave" es un SHA-256 de IP + correo: la tabla no
+-- guarda direcciones IP ni correos en claro.
+-- ---------------------------------------------------------------------
+CREATE TABLE intentos_login (
+    id       BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    clave    CHAR(64) NOT NULL,
+    momento  DATETIME NOT NULL,
+    INDEX idx_intentos_clave_momento (clave, momento)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =====================================================================
 -- DATOS SEMILLA (catálogo original de la Fase 4 + usuario admin inicial)
 -- =====================================================================

@@ -63,9 +63,19 @@ function insigniaActivo(estado){
         ? el("span", { class: "insignia insignia-ok" }, "Activo")
         : el("span", { class: "insignia insignia-inactivo" }, "Inactivo");
 }
-/** Ruta de imagen relativa al sitio -> relativa a /admin. Solo acepta rutas "img/…" (vienen validadas del servidor). */
+/**
+ * Referencia de imagen -> URL usable desde /admin.
+ *
+ * Dos formas posibles, las dos validadas en el servidor antes de guardarse:
+ *   - "img/…"            imagen del propio sitio; desde /admin hay que subir un nivel.
+ *   - "https://…"        imagen en almacenamiento externo (Supabase Storage en producción).
+ * Cualquier otra cosa cae en el isotipo, para no inyectar una URL arbitraria en un src.
+ */
 function rutaImagen(ruta){
-    return typeof ruta === "string" && /^img\/[A-Za-z0-9_\-\/]+\.(png|jpe?g|webp|gif)$/.test(ruta) ? "../" + ruta : "../img/logo/capi-barato-isotipo.png";
+    if(typeof ruta !== "string") return "../img/logo/capi-barato-isotipo.png";
+    if(/^img\/[A-Za-z0-9_\-\/]+\.(png|jpe?g|webp|gif)$/.test(ruta)) return "../" + ruta;
+    if(/^https:\/\/[A-Za-z0-9._\-]+\/[A-Za-z0-9._\-\/]+\.(png|jpe?g|webp|gif)$/.test(ruta)) return ruta;
+    return "../img/logo/capi-barato-isotipo.png";
 }
 
 // ------------------------------------------------------------ API (con CSRF)

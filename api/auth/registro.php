@@ -52,7 +52,7 @@ $hash = password_hash($password, PASSWORD_DEFAULT);
 
 $stmt = $pdo->prepare(
     'INSERT INTO usuarios (nombre, email, password_hash, rol, estado)
-     VALUES (:nombre, :email, :hash, "cliente", "activo")'
+     VALUES (:nombre, :email, :hash, \'cliente\', \'activo\')'
 );
 try {
     $stmt->execute(['nombre' => $nombre, 'email' => $email, 'hash' => $hash]);
@@ -63,7 +63,7 @@ try {
     }
     throw $e;
 }
-$idUsuario = (int) $pdo->lastInsertId();
+$idUsuario = ultimoId($pdo, 'usuarios', 'id_usuario');
 
 abrirSesionUsuario(['id_usuario' => $idUsuario, 'nombre' => $nombre, 'email' => $email, 'rol' => 'cliente']);
 

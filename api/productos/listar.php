@@ -27,7 +27,7 @@ $sql = 'SELECT p.id_producto, p.nombre, p.precio_original, p.descuento_porcentaj
         FROM productos p
         JOIN categorias c ON p.id_categoria = c.id_categoria
         LEFT JOIN producto_imagenes pi ON pi.id_producto = p.id_producto AND pi.orden = 1
-        WHERE p.estado = "activo"';
+        WHERE p.estado = \'activo\'';
 
 $parametros = [];
 if ($slugCategoria !== null) {
@@ -55,7 +55,7 @@ $productos = array_map(function ($fila) {
         'descuento_porcentaje' => $fila['descuento_porcentaje'] !== null ? (int) $fila['descuento_porcentaje'] : null,
         'precio_final'         => calcularPrecioFinal((float) $fila['precio_original'], $fila['descuento_porcentaje']),
         'stock'                => (int) $fila['stock'],
-        'envio_gratis'         => (bool) $fila['envio_gratis'],
+        'envio_gratis'         => aBooleano($fila['envio_gratis']),
         'costo_envio'          => $fila['costo_envio'] !== null ? (float) $fila['costo_envio'] : null,
         'proveedor'            => $fila['proveedor'],
         'categoria'            => [

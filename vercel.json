@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/index.php": {
+      "runtime": "vercel-php@0.9.0",
+      "maxDuration": 20
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(includes|config)/(.*)",
+      "status": 404
+    },
+    {
+      "src": "/api/(?<ruta>.*)",
+      "dest": "/api/index.php?__ruta=$ruta"
+    },
+    {
+      "handle": "filesystem"
+    }
+  ]
+}

@@ -38,7 +38,7 @@ function formatearUsuario(array $f): array
 
 const SQL_USUARIOS = 'SELECT u.id_usuario, u.nombre, u.email, u.rol, u.estado, u.fecha_registro,
                              COUNT(p.id_pedido) AS pedidos,
-                             COALESCE(SUM(CASE WHEN p.estado IN ("pagado","enviado","completado") THEN p.total END), 0) AS total_comprado
+                             COALESCE(SUM(CASE WHEN p.estado IN (\'pagado\',\'enviado\',\'completado\') THEN p.total END), 0) AS total_comprado
                       FROM usuarios u LEFT JOIN pedidos p ON p.id_usuario = u.id_usuario';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         responderError("El parámetro 'q' es demasiado largo.", 400);
     }
     if ($q !== '') {
-        $where[] = '(u.nombre LIKE :q OR u.email LIKE :q2)';
+        $where[] = '(' . sqlContiene('u.nombre', 'q') . ' OR ' . sqlContiene('u.email', 'q2') . ')';
         $par['q'] = '%' . $q . '%';
         $par['q2'] = '%' . $q . '%';
     }
@@ -108,7 +108,7 @@ $resultado = enTransaccion($pdo, function () use ($pdo, $id, $accion, $valor) {
     $dejaDeSerAdminActivo = $u['rol'] === 'admin' && $u['estado'] === 'activo'
         && (($accion === 'estado' && $valor === 'inactivo') || ($accion === 'rol' && $valor === 'cliente'));
     if ($dejaDeSerAdminActivo) {
-        $otros = $pdo->prepare('SELECT COUNT(*) FROM usuarios WHERE rol = "admin" AND estado = "activo" AND id_usuario <> :id FOR UPDATE');
+        $otros = $pdo->prepare('SELECT COUNT(*) FROM usuarios WHERE rol = \'admin\' AND estado = \'activo\' AND id_usuario <> :id FOR UPDATE');
         $otros->execute(['id' => $id]);
         if ((int) $otros->fetchColumn() === 0) {
             $pdo->rollBack();

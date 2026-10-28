@@ -50,7 +50,9 @@ reiniciar_bd(){
     t=$($MYSQL_CLI -s -N -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='$DB_NAME';")
     p=$($MYSQL_CLI "$DB_NAME" -s -N -e "SELECT COUNT(*) FROM productos;")
     c=$($MYSQL_CLI "$DB_NAME" -s -N -e "SELECT COUNT(*) FROM categorias;")
-    [ "$t" == "8" ] && [ "$p" == "12" ] && [ "$c" == "3" ] || fallar "la base importada no es la esperada (tablas=$t productos=$p categorias=$c)"
+    # 10 tablas: las 8 del dominio + "sesiones" e "intentos_login" (sesiones y limite de login
+    # en la base, para que el mismo codigo sirva en XAMPP y en serverless).
+    [ "$t" == "10" ] && [ "$p" == "12" ] && [ "$c" == "3" ] || fallar "la base importada no es la esperada (tablas=$t productos=$p categorias=$c)"
 }
 
 PID_PHP=""

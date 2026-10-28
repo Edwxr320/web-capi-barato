@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $sql .= ' AND p.stock = 0';
     }
     if ($q !== '') {
-        $sql .= ' AND p.nombre LIKE :q';
+        $sql .= ' AND ' . sqlContiene('p.nombre', 'q');
         $parametros['q'] = '%' . $q . '%';
     }
     if ($slug !== null) {
@@ -85,9 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     $r = $pdo->prepare(
         'SELECT COUNT(*) AS productos,
-                SUM(estado = "activo") AS activos,
-                SUM(estado = "activo" AND stock <= :umbral) AS stock_bajo,
-                SUM(estado = "activo" AND stock = 0) AS sin_stock,
+                SUM(CASE WHEN estado = \'activo\' THEN 1 ELSE 0 END) AS activos,
+                SUM(CASE WHEN estado = \'activo\' AND stock <= :umbral THEN 1 ELSE 0 END) AS stock_bajo,
+                SUM(CASE WHEN estado = \'activo\' AND stock = 0 THEN 1 ELSE 0 END) AS sin_stock,
                 COALESCE(SUM(stock), 0) AS unidades
          FROM productos'
     );
@@ -98,10 +98,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $porCategoria = $pdo->prepare(
         'SELECT c.id_categoria, c.nombre, c.slug,
                 COUNT(p.id_producto) AS productos,
-                COALESCE(SUM(p.estado = "activo"), 0) AS activos,
+                COALESCE(SUM(CASE WHEN p.estado = \'activo\' THEN 1 ELSE 0 END), 0) AS activos,
                 COALESCE(SUM(p.stock), 0) AS unidades,
-                COALESCE(SUM(p.estado = "activo" AND p.stock <= :umbral), 0) AS stock_bajo,
-                COALESCE(SUM(p.estado = "activo" AND p.stock = 0), 0) AS sin_stock
+                COALESCE(SUM(CASE WHEN p.estado = \'activo\' AND p.stock <= :umbral THEN 1 ELSE 0 END), 0) AS stock_bajo,
+                COALESCE(SUM(CASE WHEN p.estado = \'activo\' AND p.stock = 0 THEN 1 ELSE 0 END), 0) AS sin_stock
          FROM categorias c
          LEFT JOIN productos p ON p.id_categoria = c.id_categoria
          GROUP BY c.id_categoria ORDER BY c.nombre'

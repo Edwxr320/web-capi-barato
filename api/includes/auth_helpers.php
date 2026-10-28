@@ -5,8 +5,9 @@
  */
 
 require_once __DIR__ . '/respuesta.php';
-require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/entorno.php';
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/sesion_bd.php';
 
 const COOKIE_CSRF = 'mw_csrf';
 
@@ -16,6 +17,9 @@ function iniciarSesionSegura(): void
         // Modo estricto: PHP no acepta un id de sesión que él mismo no generó (evita session fixation
         // con un id inventado por un atacante).
         ini_set('session.use_strict_mode', '1');
+        // Sesiones en la base: imprescindible en serverless, donde el disco no se comparte entre
+        // instancias ni sobrevive. Se registra antes de session_start(). Ver sesion_bd.php.
+        registrarManejadorSesiones();
         session_set_cookie_params([
             'lifetime' => 0,       // cookie de sesión (se borra al cerrar el navegador)
             'path'     => '/',

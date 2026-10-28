@@ -21,11 +21,11 @@
  *             las líneas de carrito que lo tuvieran, por las claves foráneas ON DELETE CASCADE).
  */
 require_once __DIR__ . '/../includes/admin_helpers.php';
+require_once __DIR__ . '/../includes/almacen_imagenes.php';
 
 iniciarEndpointAdmin(['GET', 'POST']);
 $pdo = obtenerConexion();
 
-const RAIZ_SITIO = __DIR__ . '/../..';
 
 function productoCompleto(PDO $pdo, int $id): ?array
 {
@@ -63,7 +63,7 @@ function formatearProducto(array $f): array
         'precio_final'         => calcularPrecioFinal((float) $f['precio_original'], $descuento),
         'stock'                => (int) $f['stock'],
         'proveedor'            => $f['proveedor'],
-        'envio_gratis'         => (bool) $f['envio_gratis'],
+        'envio_gratis'         => aBooleano($f['envio_gratis']),
         'costo_envio'          => $f['costo_envio'] !== null ? (float) $f['costo_envio'] : null,
         'estado'               => $f['estado'],
         'imagen_principal'     => $f['imagen_principal'] ?? null,
@@ -73,16 +73,14 @@ function formatearProducto(array $f): array
     ];
 }
 
-/** Valida una ruta de imagen: dentro de img/, extensión de imagen, sin "..", y el archivo tiene que existir. */
+/**
+ * Valida una referencia de imagen. Acepta una ruta "img/…" de un archivo que existe en el sitio
+ * (lo de siempre) y, cuando el almacenamiento es Supabase, la URL pública del bucket configurado.
+ * Ninguna otra URL se acepta: ver referenciaImagenValida() en includes/almacen_imagenes.php.
+ */
 function rutaImagenValida($ruta): bool
 {
-    if (!is_string($ruta) || strlen($ruta) > 255 || str_contains($ruta, '..')) {
-        return false;
-    }
-    if (!preg_match('#^img/[A-Za-z0-9_\-/]+\.(png|jpe?g|webp|gif)$#', $ruta)) {
-        return false;
-    }
-    return is_file(RAIZ_SITIO . '/' . $ruta);
+    return referenciaImagenValida($ruta);
 }
 
 /** Lee y valida todos los campos de crear/actualizar. Devuelve un array listo para guardar. */
@@ -195,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $par['estado'] = $estado;
     }
     if ($q !== '') {
-        $sql .= ' AND (p.nombre LIKE :q OR p.proveedor LIKE :q2)';
+        $sql .= ' AND (' . sqlContiene('p.nombre', 'q') . ' OR ' . sqlContiene('p.proveedor', 'q2') . ')';
         $par['q'] = '%' . $q . '%';
         $par['q2'] = '%' . $q . '%';
     }
@@ -223,10 +221,10 @@ if ($accion === 'crear') {
         )->execute([
             'cat' => $c['id_categoria'], 'nombre' => $c['nombre'], 'descripcion' => $c['descripcion'],
             'precio' => $c['precio_original'], 'descuento' => $c['descuento_porcentaje'], 'stock' => $c['stock'],
-            'proveedor' => $c['proveedor'], 'gratis' => $c['envio_gratis'] ? 1 : 0, 'costo' => $c['costo_envio'],
+            'proveedor' => $c['proveedor'], 'gratis' => valorBooleano($c['envio_gratis']), 'costo' => $c['costo_envio'],
             'estado' => $c['estado'],
         ]);
-        $id = (int) $pdo->lastInsertId();
+        $id = ultimoId($pdo, 'productos', 'id_producto');
         guardarImagenesYCaracteristicas($pdo, $id, $c);
         return $id;
     });
@@ -253,7 +251,7 @@ if ($accion === 'actualizar') {
         )->execute([
             'cat' => $c['id_categoria'], 'nombre' => $c['nombre'], 'descripcion' => $c['descripcion'],
             'precio' => $c['precio_original'], 'descuento' => $c['descuento_porcentaje'], 'stock' => $c['stock'],
-            'proveedor' => $c['proveedor'], 'gratis' => $c['envio_gratis'] ? 1 : 0, 'costo' => $c['costo_envio'],
+            'proveedor' => $c['proveedor'], 'gratis' => valorBooleano($c['envio_gratis']), 'costo' => $c['costo_envio'],
             'estado' => $c['estado'], 'id' => $id,
         ]);
         guardarImagenesYCaracteristicas($pdo, $id, $c);
@@ -273,7 +271,7 @@ if ($accion === 'estado') {
 // eliminar
 if ((int) $actual['ventas'] > 0) {
     // Regla del proyecto: un producto con historial de ventas nunca se borra físicamente.
-    $pdo->prepare('UPDATE productos SET estado = "inactivo" WHERE id_producto = :id')->execute(['id' => $id]);
+    $pdo->prepare('UPDATE productos SET estado = \'inactivo\' WHERE id_producto = :id')->execute(['id' => $id]);
     responderJson([
         'resultado' => 'desactivado',
         'mensaje'   => "\"{$actual['nombre']}\" tiene ventas registradas: no se elimina, se desactivó para conservar el historial de pedidos.",
@@ -285,7 +283,7 @@ try {
 } catch (PDOException $e) {
     // Carrera: se vendió justo entre la verificación y el borrado (FK RESTRICT de detalle_pedido).
     if (($e->errorInfo[1] ?? 0) == 1451) {
-        $pdo->prepare('UPDATE productos SET estado = "inactivo" WHERE id_producto = :id')->execute(['id' => $id]);
+        $pdo->prepare('UPDATE productos SET estado = \'inactivo\' WHERE id_producto = :id')->execute(['id' => $id]);
         responderJson(['resultado' => 'desactivado', 'mensaje' => 'El producto tiene ventas: se desactivó en lugar de eliminarse.']);
     }
     throw $e;

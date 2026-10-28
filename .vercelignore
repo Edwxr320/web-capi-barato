@@ -1,0 +1,34 @@
+# Qué NO se sube a Vercel.
+#
+# El runtime de PHP sube todo lo que haya en la raíz del proyecto, así que acá se excluye lo que
+# no hace falta en producción: pesa, alarga el despliegue y en algunos casos no debería publicarse.
+
+# Pruebas: no corren en producción y levantan servidores y bases de datos.
+tests/
+
+# SQL y migraciones: se aplican a mano desde Supabase, no las necesita el servidor web.
+sql/
+supabase/
+
+# Documentación y material de referencia (incluye imágenes de diseño pesadas).
+docs/
+
+# Configuración local de XAMPP. Ya está en .gitignore, pero se repite acá por si alguien
+# despliega desde una copia local en lugar de hacerlo desde GitHub.
+api/config/config.php
+
+# Variables locales y token OIDC que crea 'vercel link'. No deben viajar al despliegue:
+# en Vercel los valores vienen de las variables de entorno del proyecto.
+.env.local
+.env*.local
+.env
+
+# Control de versiones y temporales del sistema.
+.git/
+.vercel/
+.gitignore
+*.bak
+*.tmp
+Thumbs.db
+desktop.ini
+.DS_Store

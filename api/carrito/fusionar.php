@@ -52,7 +52,7 @@ $pdo = obtenerConexion();
 $pdo->beginTransaction();
 try {
     foreach ($itemsLocales as $idProducto => $cantidadLocal) {
-        $stmtProd = $pdo->prepare('SELECT stock FROM productos WHERE id_producto = :id AND estado = "activo" FOR UPDATE');
+        $stmtProd = $pdo->prepare('SELECT stock FROM productos WHERE id_producto = :id AND estado = \'activo\' FOR UPDATE');
         $stmtProd->execute(['id' => $idProducto]);
         $producto = $stmtProd->fetch();
         if (!$producto) {

@@ -29,8 +29,8 @@ $sql = 'SELECT DISTINCT p.id_producto, p.nombre, p.precio_original, p.descuento_
         JOIN categorias c ON p.id_categoria = c.id_categoria
         LEFT JOIN producto_imagenes pi ON pi.id_producto = p.id_producto AND pi.orden = 1
         LEFT JOIN producto_caracteristicas pc ON pc.id_producto = p.id_producto
-        WHERE p.estado = "activo"
-          AND (p.nombre LIKE :q1 OR c.nombre LIKE :q2 OR pc.descripcion LIKE :q3)
+        WHERE p.estado = \'activo\'
+          AND (' . sqlContiene('p.nombre', 'q1') . ' OR ' . sqlContiene('c.nombre', 'q2') . ' OR ' . sqlContiene('pc.descripcion', 'q3') . ')
         ORDER BY p.id_producto';
 
 $comodin = '%' . $consulta . '%';
@@ -46,7 +46,7 @@ $productos = array_map(function ($fila) {
         'descuento_porcentaje' => $fila['descuento_porcentaje'] !== null ? (int) $fila['descuento_porcentaje'] : null,
         'precio_final'         => calcularPrecioFinal((float) $fila['precio_original'], $fila['descuento_porcentaje']),
         'stock'                => (int) $fila['stock'],
-        'envio_gratis'         => (bool) $fila['envio_gratis'],
+        'envio_gratis'         => aBooleano($fila['envio_gratis']),
         'costo_envio'          => $fila['costo_envio'] !== null ? (float) $fila['costo_envio'] : null,
         'proveedor'            => $fila['proveedor'],
         'categoria'            => [
